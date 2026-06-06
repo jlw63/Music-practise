@@ -4,8 +4,10 @@ import {createContext, useContext, useEffect, useState} from "react";
 import {supabase} from "@/lib/supabase";
 import {User} from "@supabase/supabase-js";
 
+type UserWithProfile = User & { username?: string };
+
 type AuthContextType = {
-    user: User | null;
+    user: UserWithProfile | null;
     loading: boolean;
     logout: () => void;
 };
@@ -13,19 +15,34 @@ type AuthContextType = {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({children}: {children: React.ReactNode}) {
-    const [user, setUser] = useState<User | null>(null);
+    const [user, setUser] = useState<UserWithProfile | null>(null);
     const [loading, setLoading] = useState(true);
+
+    async function fetchUserWithProfile(authUser: User | null) {
+        if (!authUser) {
+            setUser(null);
+            return;
+        }
+        
+        const { data: profile } = await supabase
+            .from("profiles")
+            .select("username")
+            .eq("id", authUser.id)
+            .single();
+        
+        setUser({ ...authUser, username: profile?.username });
+    }
 
     useEffect(() => {
         //get current session on load
         supabase.auth.getSession().then(({data}) => {
-            setUser(data.session?.user ?? null);
+            fetchUserWithProfile(data.session?.user ?? null);
             setLoading(false);
         });
 
         //2. check for login/logout changes
         const {data: authListener} = supabase.auth.onAuthStateChange((event, session) => {
-            setUser(session?.user ?? null);
+            fetchUserWithProfile(session?.user ?? null);
         });
 
         return () => {

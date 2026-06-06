@@ -68,6 +68,7 @@ function convertToEmbedUrl(url: string) {
                         type: postType,
                         videoUrl: postType === "video" ? convertToEmbedUrl(videoUrl) : undefined,
                         authorId: user.id,
+                        username: user.username,
                     };
                     addPost(newPost);
                     setTitle("");

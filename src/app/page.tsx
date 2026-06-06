@@ -11,7 +11,7 @@ export default function Home() {
       <h2>{post.title}</h2>
       <p>{post.content}</p>
       <p className="text-sm text-gray-400">
-        Posted by: {post.authorId}
+        Posted by: {post.username}
       </p>
 
       {post.type === "video" && (
