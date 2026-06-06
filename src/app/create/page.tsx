@@ -17,7 +17,16 @@ export default function CreatePage() {
         router.push("/login");
         return null;
     }
+function convertToEmbedUrl(url: string) {
+  const videoIdMatch = url.match(
+    /(?:youtube\.com\/watch\?v=|youtu\.be\/)([^\s&]+)/
+  );
 
+  if (!videoIdMatch) return url; // fallback if not YouTube
+
+  const videoId = videoIdMatch[1];
+  return `https://www.youtube.com/embed/${videoId}`;
+}
 
     return (<div className="flex flex-col gap-4 max-w-md mx-auto">
             <h1>Create Post</h1>
@@ -57,7 +66,7 @@ export default function CreatePage() {
                         title,
                         content,
                         type: postType,
-                        videoUrl: postType === "video" ? videoUrl : undefined,
+                        videoUrl: postType === "video" ? convertToEmbedUrl(videoUrl) : undefined,
                         authorId: user.id,
                     };
                     addPost(newPost);
