@@ -1,17 +1,9 @@
+"use client";
+
+import {usePosts} from "./context/PostContext";
+
 export default function Home() {
-  const posts = [
-    {
-      title: "Beethoven's 5th Symphony",
-      type: "video",
-      content:"crazy",
-      videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ"
-    },
-    {
-      title: "Bach discussion",
-      type: "discussion",
-      content: "What do you think about Bach's influence on modern music?"
-    }
-  ];
+  const {posts} = usePosts();
   return (
     <div className="flex flex-col gap-4">
       {posts.map((post) => (

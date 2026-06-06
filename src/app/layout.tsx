@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import Link from "next/link";
+import { PostProvider } from "./context/PostContext";
 
 const links = [
   { name: "Feed", href: "/" },
@@ -26,10 +27,11 @@ export default function RootLayout({children,}:
     <html lang="en">
       <body>
         <NavBar />
-
+        <PostProvider>
         <main className="py-20 max-w-6xl mx-auto">
           {children}
         </main>
+        </PostProvider>
       </body>
     </html>
   );

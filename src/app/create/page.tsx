@@ -1,14 +1,14 @@
 "use client";
 import {useState} from "react";
-
-
+import {usePosts} from "../context/PostContext";
 
 
 export default function CreatePage() {
     const [title, setTitle] = useState("");
     const [content, setContent] = useState("");
-    const [postType, setPostType] = useState("video");
+    const [postType, setPostType] = useState<"video" | "discussion">("video");
     const [videoUrl, setVideoUrl] = useState("");
+    const {addPost} = usePosts();
     return (<div className="flex flex-col gap-4 max-w-md mx-auto">
             <h1>Create Post</h1>
 
@@ -17,7 +17,7 @@ export default function CreatePage() {
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             />
-            <select value={postType} onChange={(e) => setPostType(e.target.value)} className="bg-black text-white border p-2 rounded focus:outline-none focus:ring-2 focus:ring-white">
+            <select value={postType} onChange={(e) => setPostType(e.target.value as "video" | "discussion")} className="bg-black text-white border p-2 rounded focus:outline-none focus:ring-2 focus:ring-white">
                 <option value="video">Video</option>
                 <option value="discussion">Discussion</option>
 
@@ -42,15 +42,23 @@ export default function CreatePage() {
 
             <button className="border text-white p-2 rounded hover:bg-white cursor-pointer transition hover:text-black hover:scale-105" 
                 onClick={() => {
-                    console.log("Title:", title);
-                    console.log("Content:", content);
-                }}
+
+                    const newPost = {
+                        title,
+                        content,
+                        type: postType,
+                        videoUrl: postType === "video" ? videoUrl : undefined
+                    };
+                    addPost(newPost);
+                    setTitle("");
+                    setContent("");
+                    setPostType("video");
+                    setVideoUrl("");
+
+                    }
+                }
                 >Submit
             </button>
-
-
-
-
         </div>
     );
 }
