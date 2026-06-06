@@ -17,6 +17,8 @@ export default function CreatePage() {
         router.push("/login");
         return null;
     }
+
+
     return (<div className="flex flex-col gap-4 max-w-md mx-auto">
             <h1>Create Post</h1>
 
@@ -55,13 +57,15 @@ export default function CreatePage() {
                         title,
                         content,
                         type: postType,
-                        videoUrl: postType === "video" ? videoUrl : undefined
+                        videoUrl: postType === "video" ? videoUrl : undefined,
+                        authorId: user.id,
                     };
                     addPost(newPost);
                     setTitle("");
                     setContent("");
                     setPostType("video");
                     setVideoUrl("");
+
 
                     }
                 }

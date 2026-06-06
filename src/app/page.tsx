@@ -10,12 +10,16 @@ export default function Home() {
     <div className="border rounded p-4" key={post.title}>
       <h2>{post.title}</h2>
       <p>{post.content}</p>
+      <p className="text-sm text-gray-400">
+        Posted by: {post.authorId}
+      </p>
 
       {post.type === "video" && (
         <iframe
           width="100%"
           height="515"
           src={post.videoUrl}
+
           allowFullScreen
         />
       )}

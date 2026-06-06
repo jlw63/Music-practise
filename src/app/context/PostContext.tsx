@@ -7,6 +7,7 @@ type Post = {
     content: string;
     type: "video" | "discussion";
     videoUrl?: string;
+    authorId: string;
 };
 
 type PostContextType = {
