@@ -20,9 +20,12 @@ export function NavBar() {
           <Link href="/create">Create</Link>
           <Link href="/profile">Profile</Link>
 
-          <button onClick={logout} className="ml-auto">
-            Logout
-          </button>
+          <div className="ml-auto flex items-center gap-4">
+            <span className="text-sm">{user.email}</span>
+            <button onClick={logout}>
+              Logout
+            </button>
+          </div>
         </>
       )}
     </nav>

@@ -1,14 +1,22 @@
 "use client";
 import {useState} from "react";
 import {usePosts} from "../context/PostContext";
-
+import {useAuth} from "@/context/AuthContext";
+import {useRouter} from "next/navigation";
 
 export default function CreatePage() {
+    const {user, loading} = useAuth();
     const [title, setTitle] = useState("");
     const [content, setContent] = useState("");
     const [postType, setPostType] = useState<"video" | "discussion">("video");
     const [videoUrl, setVideoUrl] = useState("");
     const {addPost} = usePosts();
+    const router = useRouter();
+    if (loading) return <p>Loading...</p>;
+    if (!user) {
+        router.push("/login");
+        return null;
+    }
     return (<div className="flex flex-col gap-4 max-w-md mx-auto">
             <h1>Create Post</h1>
 
