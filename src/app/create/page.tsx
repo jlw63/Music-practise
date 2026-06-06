@@ -8,6 +8,7 @@ export default function CreatePage() {
     const [title, setTitle] = useState("");
     const [content, setContent] = useState("");
     const [postType, setPostType] = useState("video");
+    const [videoUrl, setVideoUrl] = useState("");
     return (<div className="flex flex-col gap-4 max-w-md mx-auto">
             <h1>Create Post</h1>
 
@@ -16,6 +17,20 @@ export default function CreatePage() {
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             />
+            <select value={postType} onChange={(e) => setPostType(e.target.value)} className="bg-black text-white border p-2 rounded focus:outline-none focus:ring-2 focus:ring-white">
+                <option value="video">Video</option>
+                <option value="discussion">Discussion</option>
+
+            </select>
+
+            {postType === "video" && (
+                <input className="border p-2 rounded "
+                placeholder="Video URL"
+                value={videoUrl}
+                onChange={(e) => setVideoUrl(e.target.value)}
+                />
+            )}
+            
 
             <textarea className="border p-2 rounded h-32 resize-none "
             placeholder="Content"
@@ -23,11 +38,6 @@ export default function CreatePage() {
             onChange={(e) => setContent(e.target.value)}
             />
 
-            <select value={postType} onChange={(e) => setPostType(e.target.value)} className="border p-2 rounded">
-                <option value="video">Video</option>
-                <option value="discussion">Discussion</option>
-
-            </select>
 
 
             <button className="border text-white p-2 rounded hover:bg-white cursor-pointer transition hover:text-black hover:scale-105" 
