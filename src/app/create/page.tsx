@@ -68,7 +68,6 @@ function convertToEmbedUrl(url: string) {
                             video_url: postType === "video" ? convertToEmbedUrl(videoUrl) : undefined,
                             author_id: user.id,
                         };
-
                         const {error} = await supabase.from("posts").insert(newPost);
 
                         if (error) {
