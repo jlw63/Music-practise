@@ -47,7 +47,14 @@ export default function Home() {
       for (const post of data || []) {
         const { data: commentsData } = await supabase
           .from("comments")
-          .select("*")
+          .select(`
+            id,
+            content,
+            created_at,
+            author_id,
+            profiles (username),
+            posts(id)
+          `)
           .eq("post_id", post.id)
           .order("created_at", { ascending: true });
 
@@ -74,8 +81,16 @@ export default function Home() {
 
     // refresh comments for that post
     const { data } = await supabase
-      .from("comments")
-      .select("*")
+    .from("comments")
+    .select(`
+      id,
+      content,
+      created_at,
+      author_id,
+      profiles (
+        username
+      )
+    `)
       .eq("post_id", postId)
       .order("created_at", { ascending: true });
 
@@ -100,7 +115,7 @@ export default function Home() {
           <div className="mt-4">
             {comments[post.id]?.map((comment) => (
               <p key={comment.id}>
-                <b>{comment.author_id}</b>: {comment.content}
+                <b>{comment.profiles?.username ?? "Unknown"}</b>: {comment.content}
               </p>
             ))}
 
