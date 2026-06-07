@@ -11,6 +11,9 @@ export default function Home() {
     type: "video" | "discussion";
     video_url?: string;
     author_id: string;
+    profiles?: {
+      username: string;
+    };
   };
   const [posts, setPosts] = useState<Post[]>([]);
 
@@ -47,7 +50,7 @@ export default function Home() {
       <h2>{post.title}</h2>
       <p>{post.content}</p>
       <p className="text-sm text-gray-400">
-        Posted by: {post.profiles?.username}
+        Posted by: {post.profiles?.username ?? "Unknown"}
       </p>
 
       {post.type === "video" && (
