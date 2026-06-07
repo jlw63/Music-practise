@@ -1,8 +1,8 @@
 "use client";
 import {useState} from "react";
-import {usePosts} from "../context/PostContext";
 import {useAuth} from "@/context/AuthContext";
 import {useRouter} from "next/navigation";
+import { supabase } from "@/lib/supabase";
 
 export default function CreatePage() {
     const {user, loading} = useAuth();
@@ -10,7 +10,6 @@ export default function CreatePage() {
     const [content, setContent] = useState("");
     const [postType, setPostType] = useState<"video" | "discussion">("video");
     const [videoUrl, setVideoUrl] = useState("");
-    const {addPost} = usePosts();
     const router = useRouter();
     if (loading) return <p>Loading...</p>;
     if (!user) {
@@ -60,25 +59,32 @@ function convertToEmbedUrl(url: string) {
 
 
             <button className="border text-white p-2 rounded hover:bg-white cursor-pointer transition hover:text-black hover:scale-105" 
-                onClick={() => {
+                onClick={async() => {
+                    try {
+                        const newPost = {
+                            title,
+                            content,
+                            type: postType,
+                            video_url: postType === "video" ? convertToEmbedUrl(videoUrl) : undefined,
+                            author_id: user.id,
+                        };
 
-                    const newPost = {
-                        title,
-                        content,
-                        type: postType,
-                        videoUrl: postType === "video" ? convertToEmbedUrl(videoUrl) : undefined,
-                        authorId: user.id,
-                        username: user.username,
-                    };
-                    addPost(newPost);
-                    setTitle("");
-                    setContent("");
-                    setPostType("video");
-                    setVideoUrl("");
+                        const {error} = await supabase.from("posts").insert(newPost);
 
-
+                        if (error) {
+                            console.error("failed to create post", error);
+                            return;
+                        }
+                        
+                        setTitle("");
+                        setContent("");
+                        setPostType("video");
+                        setVideoUrl("");
+                        router.push("/");
+                    } catch (err) {
+                        console.error("Unexpected error", err);
                     }
-                }
+                }}
                 >Submit
             </button>
         </div>
