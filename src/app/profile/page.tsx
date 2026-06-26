@@ -20,6 +20,9 @@ export default function ProfilePage() {
 
   const [profile, setProfile] = useState<Profile | null>(null);
   const [posts, setPosts] = useState<Post[]>([]);
+  const [editingPostId, setEditingPostId] = useState<string | null>(null);
+  const [editTitle, setEditTitle] = useState("");
+  const [editContent, setEditContent] = useState("");
 
   useEffect(() => {
     if (!user) return;
@@ -86,6 +89,40 @@ async function handleDelete(postId: string) {
 
   setPosts(posts.filter((post) => post.id !== postId));
 }
+function startEditing(post: Post) {
+  setEditingPostId(post.id);
+  setEditTitle(post.title);
+  setEditContent(post.content);
+}
+async function saveEdit(postId: string) {
+  const { error } = await supabase
+    .from("posts")
+    .update({
+      title: editTitle,
+      content: editContent,
+    })
+    .eq("id", postId);
+
+  if (error) {
+    console.error(error);
+    alert("Failed to update post.");
+    return;
+  }
+
+  setPosts((prev) =>
+    prev.map((post) =>
+      post.id === postId
+        ? {
+            ...post,
+            title: editTitle,
+            content: editContent,
+          }
+        : post
+    )
+  );
+
+  setEditingPostId(null);
+}
 
   return (
     <div className="max-w-3xl mx-auto space-y-6">
@@ -109,25 +146,63 @@ async function handleDelete(postId: string) {
         ) : (
           posts.map((post) => (
             <div key={post.id} className="border rounded p-4 mb-4">
-              <h3 className="text-xl font-semibold">{post.title}</h3>
+              {editingPostId === post.id ? (
+                <>
+                  <input
+                    className="border p-2 rounded w-full mb-2"
+                    value={editTitle}
+                    onChange={(e) => setEditTitle(e.target.value)}
+                  />
 
-              <p className="mt-2">{post.content}</p>
+                  <textarea
+                    className="border p-2 rounded w-full h-24"
+                    value={editContent}
+                    onChange={(e) => setEditContent(e.target.value)}
+                  />
+                </>
+              ) : (
+                <>
+                  <h3 className="text-xl font-semibold">{post.title}</h3>
+                  <p className="mt-2">{post.content}</p>
+                </>
+              )}
 
               <p className="text-sm text-gray-400 mt-3">
                 {new Date(post.created_at).toLocaleDateString()}
               </p>
+            {editingPostId === post.id ? (
+              <>
+              <button
+                className="bg-green-600 px-3 py-2 rounded mr-2 mt-3"
+                onClick={() => saveEdit(post.id)}
+              >
+                Save
+              </button>
+
+              <button
+                className="bg-gray-600 px-3 py-2 rounded mt-3"
+                onClick={() => setEditingPostId(null)}
+              >
+                Cancel
+              </button>
+            </>
+          ) : (
+            <>
+              <button
+                className="bg-blue-600 hover:bg-blue-700 px-3 py-2 rounded mr-2 mt-3"
+                onClick={() => startEditing(post)}
+              >
+                Edit
+              </button>
+
               <button
                 className="bg-red-600 hover:bg-red-700 px-3 py-2 rounded mt-3"
                 onClick={() => handleDelete(post.id)}
               >
                 Delete
               </button>
-              <button
-                className="bg-green-800 hover:bg-green-900 px-3 py-2 rounded mt-3 mr-2"
-                onClick={() => startEditing(post)}
-              >
-                Edit
-              </button>
+            </>
+          )}
             </div>
           ))
         )}
