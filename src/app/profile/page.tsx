@@ -12,7 +12,10 @@ type Post = {
   id: string;
   title: string;
   content: string;
+  type : "video" | "discussion";
+  video_url?: string;
   created_at: string;
+
 };
 
 export default function ProfilePage() {
@@ -50,6 +53,8 @@ export default function ProfilePage() {
           id,
           title,
           content,
+          type, 
+          video_url,
           created_at
         `)
         .eq("author_id", user.id)
@@ -163,6 +168,15 @@ async function saveEdit(postId: string) {
                 <>
                   <h3 className="text-xl font-semibold">{post.title}</h3>
                   <p className="mt-2">{post.content}</p>
+                  {post.type === "video" && (
+                  <iframe
+                    className="mt-4 rounded"
+                    width="100%"
+                    height="400"
+                    src={post.video_url}
+                    allowFullScreen
+                  />
+                )}
                 </>
               )}
 
