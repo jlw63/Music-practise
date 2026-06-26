@@ -251,7 +251,7 @@ export default function Home() {
           <p>{post.content}</p>
 
           <p className="text-sm text-gray-400">
-            Posted by: {post.profiles?.[0]?.username ?? "Unknown"}
+            Posted by: {post.profiles?.username ?? "Unknown"}
             {post.created_at && (
               <span> • {new Date(post.created_at).toLocaleDateString()}</span>
             )}
@@ -286,7 +286,7 @@ export default function Home() {
               {comments[post.id]?.map((comment) => (
                 <div key={comment.id} className="bg-gray-900 p-3 rounded border border-gray-800">
                   <div className="flex justify-between items-start">
-                              <p className="font-medium text-white">{comment.profiles?.[0]?.username ?? "Unknown"}</p>
+                              <p className="font-medium text-white">{comment.profiles?.username ?? "Unknown"}</p>
                     <span className="text-xs text-gray-400">
                       {new Date(comment.created_at).toLocaleString()}
                     </span>
