@@ -66,6 +66,27 @@ export default function ProfilePage() {
     return <p>Please log in to view your profile.</p>;
   }
 
+async function handleDelete(postId: string) {
+  const confirmed = window.confirm(
+    "Are you sure you want to delete this post?"
+  );
+
+  if (!confirmed) return;
+
+  const { error } = await supabase
+    .from("posts")
+    .delete()
+    .eq("id", postId);
+
+  if (error) {
+    console.error(error);
+    alert("Failed to delete post.");
+    return;
+  }
+
+  setPosts(posts.filter((post) => post.id !== postId));
+}
+
   return (
     <div className="max-w-3xl mx-auto space-y-6">
       <div>
@@ -95,6 +116,18 @@ export default function ProfilePage() {
               <p className="text-sm text-gray-400 mt-3">
                 {new Date(post.created_at).toLocaleDateString()}
               </p>
+              <button
+                className="bg-red-600 hover:bg-red-700 px-3 py-2 rounded mt-3"
+                onClick={() => handleDelete(post.id)}
+              >
+                Delete
+              </button>
+              <button
+                className="bg-green-800 hover:bg-green-900 px-3 py-2 rounded mt-3 mr-2"
+                onClick={() => startEditing(post)}
+              >
+                Edit
+              </button>
             </div>
           ))
         )}
