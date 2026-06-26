@@ -22,6 +22,7 @@ export default function ProfilePage() {
   const [posts, setPosts] = useState<Post[]>([]);
   const [editingPostId, setEditingPostId] = useState<string | null>(null);
   const [editTitle, setEditTitle] = useState("");
+  const [deletingPostId, setDeletingPostId] = useState<string | null>(null);
   const [editContent, setEditContent] = useState("");
 
   useEffect(() => {
@@ -68,14 +69,11 @@ export default function ProfilePage() {
   if (!user) {
     return <p>Please log in to view your profile.</p>;
   }
-
-async function handleDelete(postId: string) {
-  const confirmed = window.confirm(
-    "Are you sure you want to delete this post?"
-  );
-
-  if (!confirmed) return;
-
+function startDeleting(postId: string) {
+  setDeletingPostId(postId);
+  setEditingPostId(null); // Closes edit mode if it was open
+}
+async function confirmDelete(postId: string) {
   const { error } = await supabase
     .from("posts")
     .delete()
@@ -88,6 +86,7 @@ async function handleDelete(postId: string) {
   }
 
   setPosts(posts.filter((post) => post.id !== postId));
+  setDeletingPostId(null);
 }
 function startEditing(post: Post) {
   setEditingPostId(post.id);
@@ -170,39 +169,58 @@ async function saveEdit(postId: string) {
               <p className="text-sm text-gray-400 mt-3">
                 {new Date(post.created_at).toLocaleDateString()}
               </p>
-            {editingPostId === post.id ? (
-              <>
-              <button
-                className="bg-green-600 px-3 py-2 rounded mr-2 mt-3"
-                onClick={() => saveEdit(post.id)}
-              >
-                Save
-              </button>
-
-              <button
-                className="bg-gray-600 px-3 py-2 rounded mt-3"
-                onClick={() => setEditingPostId(null)}
-              >
-                Cancel
-              </button>
-            </>
-          ) : (
-            <>
-              <button
-                className="bg-blue-600 hover:bg-blue-700 px-3 py-2 rounded mr-2 mt-3"
-                onClick={() => startEditing(post)}
-              >
-                Edit
-              </button>
-
-              <button
-                className="bg-red-600 hover:bg-red-700 px-3 py-2 rounded mt-3"
-                onClick={() => handleDelete(post.id)}
-              >
-                Delete
-              </button>
-            </>
-          )}
+            <div className="flex gap-2 mt-3">
+              {editingPostId === post.id ? (
+                <>
+                  <button
+                    className="bg-green-600 px-3 py-2 rounded text-white"
+                    onClick={() => saveEdit(post.id)}
+                  >
+                    Save
+                  </button>
+                  <button
+                    className="bg-gray-600 px-3 py-2 rounded text-white"
+                    onClick={() => setEditingPostId(null)}
+                  >
+                    Cancel
+                  </button>
+                </>
+              ) : deletingPostId === post.id ? (
+                /* This inline banner replaces the window.confirm browser popup */
+                <div className="bg-red-950/40 border border-red-800 p-2 rounded flex items-center gap-3 w-full justify-between">
+                  <span className="text-sm text-red-200">Are you sure you want to delete this?</span>
+                  <div className="flex gap-2">
+                    <button
+                      className="bg-red-600 hover:bg-red-700 px-3 py-1 rounded text-sm text-white font-medium"
+                      onClick={() => confirmDelete(post.id)}
+                    >
+                      Yes, Delete
+                    </button>
+                    <button
+                      className="bg-gray-600 hover:bg-gray-700 px-3 py-1 rounded text-sm text-white"
+                      onClick={() => setDeletingPostId(null)}
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <>
+                  <button
+                    className="bg-blue-600 hover:bg-blue-700 px-3 py-2 rounded text-white"
+                    onClick={() => startEditing(post)}
+                  >
+                    Edit
+                  </button>
+                  <button
+                    className="bg-red-600 hover:bg-red-700 px-3 py-2 rounded text-white"
+                    onClick={() => startDeleting(post.id)}
+                  >
+                    Delete
+                  </button>
+                </>
+              )}
+            </div>
             </div>
           ))
         )}
