@@ -3,7 +3,7 @@
 import { supabase } from "@/lib/supabase";
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
-
+import PostCard from "@/app/components/PostCards";
 
 type Profile = {
   username: string;
@@ -17,6 +17,7 @@ type Post = {
   type: "video" | "discussion";
   video_url?: string;
   created_at: string;
+  author_id: string;
 };
 
 
@@ -29,7 +30,7 @@ export default function UserProfilePage() {
 
   const [profile,setProfile] = useState<Profile | null>(null);
   const [posts,setPosts] = useState<Post[]>([]);
-
+const [loading,setLoading] = useState(true);
 
   useEffect(()=>{
 
@@ -63,7 +64,8 @@ export default function UserProfilePage() {
         content,
         type,
         video_url,
-        created_at
+        created_at,
+        author_id
       `)
       .eq("author_id",userId)
       .order("created_at",{ascending:false});
@@ -77,6 +79,10 @@ export default function UserProfilePage() {
 
 
       setPosts(postsData || []);
+      setLoading(false);
+      if(loading){
+        return <p>Loading profile...</p>
+        }
 
 
     }
@@ -103,38 +109,11 @@ Posts
 </h2>
 
 
-{posts.map(post=>(
-
-<div
-key={post.id}
-className="border rounded p-4 mb-4"
->
-
-<h3 className="text-xl font-semibold">
-{post.title}
-</h3>
-
-
-<p>
-{post.content}
-</p>
-
-
-{post.type==="video" && post.video_url && (
-
-<iframe
-className="mt-4 rounded"
-width="100%"
-height="400"
-src={post.video_url}
-/>
-
-)}
-
-
-</div>
-
-
+{posts.map(post => (
+  <PostCard 
+    key={post.id}
+    post={post}
+  />
 ))}
 
 
