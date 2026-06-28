@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/context/AuthContext";
+import Link from "next/dist/client/link";
 
 export default function Home() {
   const { user } = useAuth();
@@ -49,6 +50,7 @@ export default function Home() {
           type,
           video_url,
           created_at,
+          author_id,
           profiles (username)
         `)
         .order("created_at", { ascending: false });
@@ -247,15 +249,18 @@ export default function Home() {
 
       {posts.map((post) => (
         <div className="border rounded p-4" key={post.id}>
-          <h2>{post.title}</h2>
-          <p>{post.content}</p>
-
-          <p className="text-sm text-gray-400">
-            Posted by: {post.profiles?.username ?? "Unknown"}
+          <h1 className="text-lg font-semibold">
+            <Link href={`/profile/${post.author_id}`}>
+              {post.profiles?.username ?? "Unknown"}
+            </Link>
             {post.created_at && (
               <span> • {new Date(post.created_at).toLocaleDateString()}</span>
             )}
-          </p>
+          </h1>
+          <h2>{post.title}</h2>
+          <p>{post.content}</p>
+
+
           {post.type === "video" && (
             <iframe
               width="100%"
