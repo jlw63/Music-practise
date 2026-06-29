@@ -18,6 +18,9 @@ type Post = {
   video_url?: string;
   created_at: string;
   author_id: string;
+  profiles?: {
+    username:string;
+    };
 };
 
 
@@ -31,71 +34,64 @@ export default function UserProfilePage() {
   const [profile,setProfile] = useState<Profile | null>(null);
   const [posts,setPosts] = useState<Post[]>([]);
 const [loading,setLoading] = useState(true);
+useEffect(()=>{
 
-  useEffect(()=>{
+  async function fetchUser(){
 
-    async function fetchUser(){
-
-      const {data: profileData,error} =
-      await supabase
-      .from("profiles")
-      .select("username")
-      .eq("id",userId)
-      .single();
-
-
-      if(error){
-        console.log(error);
-        return;
-      }
+    const {data: profileData,error} =
+    await supabase
+    .from("profiles")
+    .select("username")
+    .eq("id",userId)
+    .single();
 
 
-      setProfile(profileData);
-
-
-
-      const {data: postsData,error:postsError}
-      =
-      await supabase
-      .from("posts")
-      .select(`
-        id,
-        title,
-        content,
-        type,
-        video_url,
-        created_at,
-        author_id
-        profiles(username)
-      `)
-      .eq("author_id",userId)
-      .order("created_at",{ascending:false});
-
-
-
-      if(postsError){
-        console.log(postsError);
-        return;
-      }
-
-
-      setPosts(postsData || []);
-      setLoading(false);
-      if(loading){
-        return <p>Loading profile...</p>
-        }
-
-
+    if(error){
+      console.log(error);
+      return;
     }
 
 
-    fetchUser();
-
-
-  },[userId]);
+    setProfile(profileData);
 
 
 
+    const {data: postsData,error:postsError}
+    =
+    await supabase
+    .from("posts")
+    .select(`
+      id,
+      title,
+      content,
+      type,
+      video_url,
+      created_at,
+      author_id,
+      profiles(username)
+    `)
+    .eq("author_id",userId)
+    .order("created_at",{ascending:false});
+
+
+
+    if(postsError){
+      console.log(postsError);
+      return;
+    }
+
+
+    setPosts(postsData || []);
+
+    setLoading(false);
+
+  }
+
+
+  fetchUser();
+
+
+},[userId]);
 return (
 
 <div className="max-w-3xl mx-auto">

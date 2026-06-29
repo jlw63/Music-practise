@@ -7,183 +7,154 @@ import PostCard from "@/app/components/PostCards";
 
 
 type Profile = {
-  username: string;
+username:string;
 };
 
 
 type Post = {
-  id: string;
-  title: string;
-  content: string;
-  type: "video" | "discussion";
-  author_id: string;
-  video_url?: string;
-  created_at: string;
-  profiles?: {
-  username: string;
-  };
+id:string;
+title:string;
+content:string;
+type:"video"|"discussion";
+video_url?:string;
+created_at:string;
+author_id:string;
+profiles?:{
+username:string;
+};
 };
 
 
 
-export default function ProfilePage() {
-
-  const { user } = useAuth();
+export default function ProfilePage(){
 
 
-  const [profile, setProfile] = useState<Profile | null>(null);
-  const [posts, setPosts] = useState<Post[]>([]);
+const {user}=useAuth();
 
 
-  const [editingPostId, setEditingPostId] = useState<string | null>(null);
+const [profile,setProfile]=useState<Profile|null>(null);
 
-  const [editTitle, setEditTitle] = useState("");
-  const [editContent, setEditContent] = useState("");
-
-  useEffect(() => {
-    if (!user) return;
-
-    const userId = user.id;
-
-    async function fetchProfile(){
+const [posts,setPosts]=useState<Post[]>([]);
 
 
-      const {data:profileData,error} =
-      await supabase
-      .from("profiles")
-      .select("username")
-      .eq("id", userId)
-      .single();
+const [editingPostId,setEditingPostId]=useState<string|null>(null);
 
+const [editTitle,setEditTitle]=useState("");
 
-      if(error){
-        console.log(error);
-        return;
-      }
-
-
-      setProfile(profileData);
+const [editContent,setEditContent]=useState("");
 
 
 
-      const {data:postsData,error:postsError}
-      =
-      await supabase
-      .from("posts")
-      .select(`
-        id,
-        title,
-        content,
-        type,
-        author_id,
-        video_url,
-        created_at,
-        profiles (username)
-      `)
-      .eq("author_id", userId)
-      .order("created_at",{ascending:false});
-    
+
+
+useEffect(()=>{
+
+if(!user)return;
+
+
+async function fetchProfile(){
+
+
+const {data:profileData}=await supabase
+.from("profiles")
+.select("username")
+.eq("id",user.id)
+.single();
+
+
+setProfile(profileData);
 
 
 
-      if(postsError){
-        console.log(postsError);
-        return;
-      }
+const {data:postsData}=await supabase
+.from("posts")
+.select(`
+id,
+title,
+content,
+type,
+video_url,
+created_at,
+author_id,
+profiles(username)
+`)
+.eq("author_id",user.id)
+.order("created_at",{ascending:false});
 
 
-      setPosts(postsData || []);
+setPosts(postsData || []);
 
 
-    }
+}
 
 
-    fetchProfile();
+fetchProfile();
 
 
-  },[user]);
-
-
-
-  if(!user){
-    return <p>Please login to view profile</p>
-  }
-
-
-
-  function startEditing(post:Post){
-
-    setEditingPostId(post.id);
-
-    setEditTitle(post.title);
-    setEditContent(post.content);
-
-  }
+},[user]);
 
 
 
-  async function saveEdit(postId:string){
-
-
-    const {error} =
-    await supabase
-    .from("posts")
-    .update({
-      title:editTitle,
-      content:editContent
-    })
-    .eq("id",postId);
 
 
 
-    if(error){
-      console.log(error);
-      return;
-    }
+async function deletePost(id:string){
+
+
+await supabase
+.from("posts")
+.delete()
+.eq("id",id);
+
+
+setPosts(prev=>prev.filter(post=>post.id!==id));
+
+
+}
 
 
 
-    setPosts(prev =>
-      prev.map(post =>
-        post.id === postId
-        ?
-        {
-          ...post,
-          title:editTitle,
-          content:editContent
-        }
-        :
-        post
-      )
-    );
+
+async function saveEdit(id:string){
 
 
-    setEditingPostId(null);
+await supabase
+.from("posts")
+.update({
 
+title:editTitle,
 
-  }
+content:editContent
+
+})
+.eq("id",id);
 
 
 
-  async function deletePost(postId:string){
+setPosts(prev=>prev.map(post=>
 
-  if (!confirm("Delete this post?")) {
-    return;
-  }
+post.id===id
 
-  const { error } = await supabase
-    .from("posts")
-    .delete()
-    .eq("id", postId);
+?
 
-  if (error) {
-    console.log(error);
-    return;
-  }
+{
+...post,
+title:editTitle,
+content:editContent
+}
 
-  setPosts(prev => prev.filter(post => post.id !== postId));
+:
 
-  }
+post
+
+
+));
+
+
+setEditingPostId(null);
+
+
+}
 
 
 
@@ -191,90 +162,120 @@ export default function ProfilePage() {
 
 return (
 
-<div className="max-w-3xl mx-auto space-y-6">
+<div className="max-w-3xl mx-auto">
 
 
 <h1 className="text-3xl font-bold">
-{profile?.username ?? "Loading..."}
+{profile?.username}
 </h1>
 
 
-<p className="text-gray-400">
-{user.email}
-</p>
-
-
-<p>
-{posts.length} posts
-</p>
-
-
-
-<h2 className="text-2xl font-semibold">
+<h2 className="text-2xl mt-6">
 My Posts
 </h2>
 
 
 
-{posts.map((post) => (
-  <div key={post.id} className="space-y-3">
+{posts.map(post=>(
 
-    <PostCard post={post} />
 
-    {editingPostId === post.id ? (
-      <>
-        <input
-          className="border p-2 w-full rounded"
-          value={editTitle}
-          onChange={(e) => setEditTitle(e.target.value)}
-        />
+<div key={post.id}>
 
-        <textarea
-          className="border p-2 w-full rounded"
-          value={editContent}
-          onChange={(e) => setEditContent(e.target.value)}
-        />
 
-        <div className="flex gap-2">
-          <button
-            className="bg-green-600 text-white px-3 py-2 rounded"
-            onClick={() => saveEdit(post.id)}
-          >
-            Save
-          </button>
+<PostCard post={post}/>
 
-          <button
-            className="bg-gray-600 text-white px-3 py-2 rounded"
-            onClick={() => setEditingPostId(null)}
-          >
-            Cancel
-          </button>
-        </div>
-      </>
-    ) : (
-      <div className="flex gap-2">
-        <button
-          className="bg-blue-600 text-white px-3 py-2 rounded"
-          onClick={() => startEditing(post)}
-        >
-          Edit
-        </button>
 
-        <button
-          className="bg-red-600 text-white px-3 py-2 rounded"
-          onClick={() => deletePost(post.id)}
-        >
-          Delete
-        </button>
-      </div>
-    )}
 
-  </div>
+<button
+
+className="bg-blue-600 text-white px-3 py-2 rounded mr-2"
+
+onClick={()=>{
+
+setEditingPostId(post.id);
+
+setEditTitle(post.title);
+
+setEditContent(post.content);
+
+}}
+
+>
+
+Edit
+
+</button>
+
+
+
+<button
+
+className="bg-red-600 text-white px-3 py-2 rounded"
+
+onClick={()=>deletePost(post.id)}
+
+>
+
+Delete
+
+</button>
+
+
+
+{editingPostId===post.id && (
+
+<div>
+
+<input
+
+className="border p-2 w-full"
+
+value={editTitle}
+
+onChange={(e)=>setEditTitle(e.target.value)}
+
+/>
+
+
+<textarea
+
+className="border p-2 w-full mt-2"
+
+value={editContent}
+
+onChange={(e)=>setEditContent(e.target.value)}
+
+/>
+
+
+<button
+
+className="bg-green-600 text-white px-3 py-2 mt-2 rounded"
+
+onClick={()=>saveEdit(post.id)}
+
+>
+
+Save
+
+</button>
+
+
+</div>
+
+)}
+
+
+
+</div>
+
+
 ))}
 
 
 
 </div>
+
 
 )
 
