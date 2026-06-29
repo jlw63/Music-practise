@@ -23,6 +23,7 @@ type Comment = {
   id: string;
   content: string;
   created_at: string;
+  author_id: string;
   profiles?: {
     username: string;
   };
@@ -49,6 +50,56 @@ const [comments,setComments] = useState<Comment[]>([]);
 
 const [newComment,setNewComment] = useState("");
 
+const [editingCommentId,setEditingCommentId] = useState<string | null>(null);
+
+const [editComment,setEditComment] = useState("");
+
+async function saveComment(commentId: string){
+
+const { error } = await supabase
+.from("comments")
+.update({
+  content: editComment
+})
+.eq("id", commentId);
+
+if(error){
+  console.log(error);
+  return;
+}
+
+setComments(prev =>
+  prev.map(comment =>
+    comment.id === commentId
+      ? {
+          ...comment,
+          content: editComment
+        }
+      : comment
+  )
+);
+
+setEditingCommentId(null);
+
+}
+
+async function deleteComment(commentId:string){
+
+const { error } = await supabase
+.from("comments")
+.delete()
+.eq("id", commentId);
+
+if(error){
+  console.log(error);
+  return;
+}
+
+setComments(prev =>
+  prev.filter(comment => comment.id !== commentId)
+);
+
+}
 
 
 useEffect(()=>{
@@ -89,6 +140,7 @@ const {data:commentsData}= await supabase
 id,
 content,
 created_at,
+author_id,
 profiles(username)
 `)
 .eq("post_id",post.id)
@@ -196,6 +248,7 @@ const {data}=await supabase
 id,
 content,
 created_at,
+author_id,
 profiles(username)
 `)
 .eq("post_id",post.id)
@@ -280,8 +333,6 @@ onClick={handleLike}
 Comments
 </h3>
 
-
-
 {comments.map(comment=>(
 
 <div
@@ -293,15 +344,103 @@ className="bg-gray-900 p-3 rounded mt-2"
 {comment.profiles?.username ?? "Unknown"}
 </p>
 
+
+{editingCommentId === comment.id ? (
+
+<div>
+
+<input
+
+className="border p-2 rounded w-full mt-2"
+
+value={editComment}
+
+onChange={(e)=>setEditComment(e.target.value)}
+
+/>
+
+
+<button
+
+className="bg-green-600 text-white px-3 py-1 rounded mt-2 mr-2"
+
+onClick={()=>saveComment(comment.id)}
+
+>
+Save
+</button>
+
+
+<button
+
+className="bg-gray-600 text-white px-3 py-1 rounded mt-2"
+
+onClick={()=>setEditingCommentId(null)}
+
+>
+Cancel
+</button>
+
+
+</div>
+
+
+) : (
+
+<>
+
 <p>
 {comment.content}
 </p>
+
+
+{user?.id === comment.author_id && (
+
+<div className="mt-2">
+
+
+<button
+
+className="bg-blue-600 text-white px-2 py-1 rounded mr-2"
+
+onClick={()=>{
+
+setEditingCommentId(comment.id);
+
+setEditComment(comment.content);
+
+}}
+
+>
+Edit
+</button>
+
+
+<button
+
+className="bg-red-600 text-white px-2 py-1 rounded"
+
+onClick={()=>deleteComment(comment.id)}
+
+>
+Delete
+</button>
+
+
+</div>
+
+)}
+
+
+</>
+
+)}
+
 
 </div>
 
 
 ))}
-
 
 
 
