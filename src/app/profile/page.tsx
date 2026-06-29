@@ -19,6 +19,9 @@ type Post = {
   author_id: string;
   video_url?: string;
   created_at: string;
+  profiles?: {
+  username: string;
+  };
 };
 
 
@@ -79,6 +82,7 @@ export default function ProfilePage() {
       `)
       .eq("author_id", userId)
       .order("created_at",{ascending:false});
+    
 
 
 
@@ -88,7 +92,7 @@ export default function ProfilePage() {
       }
 
 
-      setPosts((postsData as Post[]) || []);
+      setPosts(postsData || []);
 
 
     }
@@ -163,25 +167,21 @@ export default function ProfilePage() {
 
   async function deletePost(postId:string){
 
+  if (!confirm("Delete this post?")) {
+    return;
+  }
 
-    const {error} =
-    await supabase
+  const { error } = await supabase
     .from("posts")
     .delete()
-    .eq("id",postId);
+    .eq("id", postId);
 
+  if (error) {
+    console.log(error);
+    return;
+  }
 
-
-    if(error){
-      console.log(error);
-      return;
-    }
-
-
-    setPosts(prev =>
-      prev.filter(post=>post.id !== postId)
-    );
-
+  setPosts(prev => prev.filter(post => post.id !== postId));
 
   }
 
@@ -216,74 +216,60 @@ My Posts
 
 
 
-{posts.map(post=>(
+{posts.map((post) => (
+  <div key={post.id} className="space-y-3">
 
-<div key={post.id}>
+    <PostCard post={post} />
 
+    {editingPostId === post.id ? (
+      <>
+        <input
+          className="border p-2 w-full rounded"
+          value={editTitle}
+          onChange={(e) => setEditTitle(e.target.value)}
+        />
 
-<PostCard post={post}/>
+        <textarea
+          className="border p-2 w-full rounded"
+          value={editContent}
+          onChange={(e) => setEditContent(e.target.value)}
+        />
 
+        <div className="flex gap-2">
+          <button
+            className="bg-green-600 text-white px-3 py-2 rounded"
+            onClick={() => saveEdit(post.id)}
+          >
+            Save
+          </button>
 
+          <button
+            className="bg-gray-600 text-white px-3 py-2 rounded"
+            onClick={() => setEditingPostId(null)}
+          >
+            Cancel
+          </button>
+        </div>
+      </>
+    ) : (
+      <div className="flex gap-2">
+        <button
+          className="bg-blue-600 text-white px-3 py-2 rounded"
+          onClick={() => startEditing(post)}
+        >
+          Edit
+        </button>
 
-{editingPostId === post.id && (
+        <button
+          className="bg-red-600 text-white px-3 py-2 rounded"
+          onClick={() => deletePost(post.id)}
+        >
+          Delete
+        </button>
+      </div>
+    )}
 
-<div className="space-y-2 mt-3">
-
-<input
-className="border p-2 w-full"
-value={editTitle}
-onChange={(e)=>setEditTitle(e.target.value)}
-/>
-
-
-<textarea
-className="border p-2 w-full"
-value={editContent}
-onChange={(e)=>setEditContent(e.target.value)}
-/>
-
-
-<button
-className="bg-green-600 text-white px-3 py-2 rounded"
-onClick={()=>saveEdit(post.id)}
->
-Save
-</button>
-
-
-</div>
-
-)}
-
-
-
-<div className="flex gap-2 mt-3">
-
-
-<button
-className="bg-blue-600 text-white px-3 py-2 rounded"
-onClick={()=>startEditing(post)}
->
-Edit
-</button>
-
-
-
-<button
-className="bg-red-600 text-white px-3 py-2 rounded"
-onClick={()=>deletePost(post.id)}
->
-Delete
-</button>
-
-
-</div>
-
-
-
-</div>
-
-
+  </div>
 ))}
 
 

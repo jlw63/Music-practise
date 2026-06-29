@@ -66,6 +66,7 @@ const [loading,setLoading] = useState(true);
         video_url,
         created_at,
         author_id
+        profiles(username)
       `)
       .eq("author_id",userId)
       .order("created_at",{ascending:false});
