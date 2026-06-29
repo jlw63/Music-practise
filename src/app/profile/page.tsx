@@ -4,7 +4,7 @@ import { useAuth } from "@/context/AuthContext";
 import { supabase } from "@/lib/supabase";
 import { useEffect, useState } from "react";
 import PostCard from "@/app/components/PostCards";
-
+import UserList from "@/app/components/UserList";
 
 type Profile = {
 username:string;
