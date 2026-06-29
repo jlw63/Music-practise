@@ -245,6 +245,7 @@ className="mt-4 rounded"
 width="100%"
 height="515"
 src={post.video_url}
+allowFullScreen
 />
 
 )}

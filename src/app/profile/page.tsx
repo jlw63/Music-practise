@@ -43,7 +43,7 @@ const [editTitle,setEditTitle]=useState("");
 
 const [editContent,setEditContent]=useState("");
 
-
+const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
 
 
 
@@ -97,21 +97,31 @@ fetchProfile();
 
 
 
-
 async function deletePost(id:string){
 
 
-await supabase
+const {error} = await supabase
 .from("posts")
 .delete()
 .eq("id",id);
 
 
-setPosts(prev=>prev.filter(post=>post.id!==id));
 
-
+if(error){
+console.log(error);
+return;
 }
 
+
+
+setPosts(prev =>
+prev.filter(post=>post.id !== id)
+);
+
+
+setDeleteConfirmId(null);
+
+}
 
 
 
@@ -179,12 +189,18 @@ My Posts
 {posts.map(post=>(
 
 
-<div key={post.id}>
+<div 
+key={post.id}
+className=" p-4 mb-4"
+>
 
 
 <PostCard post={post}/>
 
 
+{editingPostId !== post.id && (
+
+<div>
 
 <button
 
@@ -206,13 +222,42 @@ Edit
 
 </button>
 
+{deleteConfirmId === post.id ? (
+
+<div className="flex gap-2">
+
+<button
+
+className="bg-red-700 text-white px-3 py-2 rounded"
+
+onClick={()=>deletePost(post.id)}
+
+>
+Confirm Delete
+</button>
+
+
+<button
+
+className="bg-gray-600 text-white px-3 py-2 rounded"
+
+onClick={()=>setDeleteConfirmId(null)}
+
+>
+Cancel
+</button>
+
+</div>
+
+
+) : (
 
 
 <button
 
 className="bg-red-600 text-white px-3 py-2 rounded"
 
-onClick={()=>deletePost(post.id)}
+onClick={()=>setDeleteConfirmId(post.id)}
 
 >
 
@@ -220,6 +265,12 @@ Delete
 
 </button>
 
+
+)}
+
+</div>
+
+)}
 
 
 {editingPostId===post.id && (
