@@ -26,7 +26,7 @@ type Comment = {
   author_id: string;
   profiles?: {
     username: string;
-  };
+  }[];
 };
 
 
@@ -199,7 +199,19 @@ await supabase
 post_id:post.id,
 user_id:user.id
 });
+await supabase
+.from("notifications")
+.insert({
 
+receiver_id:post.author_id,
+
+sender_id:user.id,
+
+type:"like",
+
+post_id:post.id
+
+});
 
 
 setLikes(prev=>({
@@ -237,6 +249,19 @@ content:newComment
 
 });
 
+await supabase
+.from("notifications")
+.insert({
+
+receiver_id:post.author_id,
+
+sender_id:user.id,
+
+type:"comment",
+
+post_id:post.id
+
+});
 
 setNewComment("");
 
@@ -341,7 +366,7 @@ className="bg-gray-900 p-3 rounded mt-2"
 >
 
 <p className="font-medium">
-{comment.profiles?.username ?? "Unknown"}
+{comment.profiles?.[0].username ?? "Unknown"}
 </p>
 
 

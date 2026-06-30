@@ -15,6 +15,9 @@ export function NavBar() {
             Following
           </Link>
         )}
+        <Link href="/notifications">
+        🔔
+        </Link>
 
       {!user ? (
         <>

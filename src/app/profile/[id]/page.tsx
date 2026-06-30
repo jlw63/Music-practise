@@ -150,6 +150,8 @@ const {data:followData}=await supabase
 
 
 
+
+
 setFollowing(!!followData);
 
 
@@ -284,7 +286,17 @@ following_id:userId
 
 });
 
+await supabase
+.from("notifications")
+.insert({
 
+receiver_id:userId,
+
+sender_id:user.id,
+
+type:"follow"
+
+});
 
 setFollowing(true);
 

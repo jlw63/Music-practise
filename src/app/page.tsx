@@ -59,22 +59,20 @@ fetchPosts();
 
 
 },[]);
+return (
+  <div className="max-w-3xl mx-auto space-y-6">
 
-  return (
-    <div className="flex flex-col gap-4">
+    {loading && (
+      <p>Loading...</p>
+    )}
 
-      {loading && (
-       <p>Loading ...</p>
-      )}
+    {posts.map(post => (
+      <PostCard
+        key={post.id}
+        post={post}
+      />
+    ))}
 
-
-
-{posts.map(post => (
-  <PostCard
-    key={post.id}
-    post={post}
-  />
-))}
-    </div>
-  );
+  </div>
+);
 }

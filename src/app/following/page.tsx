@@ -17,7 +17,7 @@ created_at:string;
 author_id:string;
 profiles:{
 username:string;
-};
+}[];
 };
 
 
