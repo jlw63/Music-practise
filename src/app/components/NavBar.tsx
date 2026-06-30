@@ -8,7 +8,13 @@ export function NavBar() {
 
   return (
     <nav className="bg-base-300 p-4 flex gap-4">
-      <Link href="/">Feed</Link>
+        <Link href="/">Latest</Link>
+
+        {user && (
+          <Link href="/following">
+            Following
+          </Link>
+        )}
 
       {!user ? (
         <>

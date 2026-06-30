@@ -157,61 +157,57 @@ setFollowing(!!followData);
 
 
 
-
-
-// get followers list
-
-const {data:followerUsers}=await supabase
+// get followers
+const {data:followerUsers,error:followerError}=await supabase
 .from("followers")
 .select(`
-follower_id,
-profiles(username)
+  follower_id,
+  profiles!followers_follower_id_fkey(
+    id,
+    username
+  )
 `)
 .eq("following_id",userId);
 
 
+if(followerError){
+  console.log(followerError);
+}
+
 
 setFollowerList(
-
-followerUsers?.map((f:any)=>({
-
-id:f.follower_id,
-
-username:f.profiles?.username || "Unknown"
-
-})) || []
-
+  followerUsers?.map((f:any)=>({
+    id:f.profiles.id,
+    username:f.profiles.username
+  })) || []
 );
 
 
 
-
-
-
-// get following list
-
-const {data:followingUsers}=await supabase
+// get following
+const {data:followingUsers,error:followingError}=await supabase
 .from("followers")
 .select(`
-following_id,
-profiles(username)
+  following_id,
+  profiles!followers_following_id_fkey(
+    id,
+    username
+  )
 `)
 .eq("follower_id",userId);
 
 
+if(followingError){
+ console.log(followingError);
+}
+
 
 setFollowingList(
-
-followingUsers?.map((f:any)=>({
-
-id:f.following_id,
-
-username:f.profiles?.username || "Unknown"
-
-})) || []
-
+  followingUsers?.map((f:any)=>({
+    id:f.profiles.id,
+    username:f.profiles.username
+  })) || []
 );
-
 
 
 setLoading(false);
