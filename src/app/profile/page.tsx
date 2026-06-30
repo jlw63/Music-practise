@@ -4,7 +4,6 @@ import { useAuth } from "@/context/AuthContext";
 import { supabase } from "@/lib/supabase";
 import { useEffect, useState } from "react";
 import PostCard from "@/app/components/PostCards";
-import UserList from "@/app/components/UserList";
 
 type Profile = {
 username:string;
@@ -21,7 +20,7 @@ created_at:string;
 author_id:string;
 profiles?:{
 username:string;
-};
+}[];
 };
 
 
@@ -51,14 +50,15 @@ useEffect(()=>{
 
 if(!user)return;
 
-
 async function fetchProfile(){
+
+const currentUser = user;
 
 
 const {data:profileData}=await supabase
 .from("profiles")
 .select("username")
-.eq("id",user.id)
+.eq("id",user!.id)
 .single();
 
 
@@ -78,7 +78,7 @@ created_at,
 author_id,
 profiles(username)
 `)
-.eq("author_id",user.id)
+.eq("author_id",user!.id)
 .order("created_at",{ascending:false});
 
 
@@ -92,9 +92,6 @@ fetchProfile();
 
 
 },[user]);
-
-
-
 
 
 async function deletePost(id:string){

@@ -23,7 +23,7 @@ type Post = {
   author_id: string;
   profiles?: {
     username:string;
-  };
+  }[];
 };
 
 
@@ -253,7 +253,10 @@ await supabase
 .eq("following_id",userId)
 .eq("follower_id",user.id);
 
-
+if(Error){
+  console.log(Error);
+  return;
+}
 
 setFollowing(false);
 
@@ -286,6 +289,11 @@ following_id:userId
 
 });
 
+if(Error){
+  console.log(Error);
+  return;
+}
+
 await supabase
 .from("notifications")
 .insert({
@@ -313,7 +321,7 @@ setFollowerList(prev=>[
 
 id:user.id,
 
-username:user.user_metadata.username || "Unknown"
+username: profile?.username || "Unknown"
 
 }
 

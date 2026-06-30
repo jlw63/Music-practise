@@ -15,7 +15,7 @@ type Post = {
   author_id: string;
   profiles?: {
     username: string;
-  };
+  }[];
 };
 
 
@@ -159,11 +159,7 @@ fetchData();
 },[post.id,user]);
 
 
-
-
-
 async function handleLike(){
-
 
 if(!user){
 alert("Login first");
@@ -174,13 +170,11 @@ return;
 
 if(likes.liked){
 
-
 await supabase
 .from("likes")
 .delete()
 .eq("post_id",post.id)
 .eq("user_id",user.id);
-
 
 
 setLikes(prev=>({
@@ -199,6 +193,10 @@ await supabase
 post_id:post.id,
 user_id:user.id
 });
+
+
+if(post.author_id !== user.id){
+
 await supabase
 .from("notifications")
 .insert({
@@ -213,6 +211,8 @@ post_id:post.id
 
 });
 
+}
+
 
 setLikes(prev=>({
 count:prev.count+1,
@@ -222,11 +222,7 @@ liked:true
 
 }
 
-
 }
-
-
-
 
 async function handleComment(){
 
@@ -249,6 +245,9 @@ content:newComment
 
 });
 
+
+if(post.author_id !== user.id){
+
 await supabase
 .from("notifications")
 .insert({
@@ -262,6 +261,9 @@ type:"comment",
 post_id:post.id
 
 });
+
+}
+
 
 setNewComment("");
 
@@ -296,7 +298,7 @@ return (
 
 <Link href={`/profile/${post.author_id}`}>
   <h1 className="text-lg font-semibold hover:underline cursor-pointer">
-    {post.profiles?.username ?? "Unknown"}
+    {post.profiles?.[0]?.username ?? "Unknown"}
   </h1>
 </Link>
 
@@ -366,7 +368,7 @@ className="bg-gray-900 p-3 rounded mt-2"
 >
 
 <p className="font-medium">
-{comment.profiles?.[0].username ?? "Unknown"}
+{comment.profiles?.[0]?.username ?? "Unknown"}
 </p>
 
 

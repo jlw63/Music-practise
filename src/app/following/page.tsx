@@ -89,7 +89,7 @@ setPosts(data || []);
 
 
 async function getFollowingIds(){
-
+if(!user) return [];
 
 const {data}=await supabase
 

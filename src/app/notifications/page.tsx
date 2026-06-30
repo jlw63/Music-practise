@@ -37,6 +37,8 @@ if(!user)return;
 async function fetchNotifications(){
 
 
+if(!user) return;
+
 
 const {data,error}=await supabase
 

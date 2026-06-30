@@ -12,11 +12,11 @@ export default function Home() {
     content: string;
     type: "video" | "discussion";
     video_url?: string;
-    created_at?: string;
+    created_at: string;
     author_id: string;
     profiles?: {
       username: string;
-    };
+    }[];
   };
 
 
