@@ -39,6 +39,25 @@ export default function PostCard({post}: Props){
 
 const {user} = useAuth();
 
+const [authorUsername, setAuthorUsername] = useState<string | null>(
+  post.profiles?.[0]?.username || null
+);
+
+useEffect(() => {
+  if (authorUsername) return;
+  async function fetchAuthor() {
+    const { data, error } = await supabase
+      .from("profiles")
+      .select("username")
+      .eq("id", post.author_id)
+      .single();
+
+    if (data?.username) setAuthorUsername(data.username);
+  }
+
+  fetchAuthor();
+}, [post.author_id, authorUsername]);
+
 
 const [likes,setLikes] = useState({
   count:0,
@@ -53,6 +72,36 @@ const [newComment,setNewComment] = useState("");
 const [editingCommentId,setEditingCommentId] = useState<string | null>(null);
 
 const [editComment,setEditComment] = useState("");
+
+// Fill missing usernames for comments in batch
+async function fillCommentUsernames(commentsArr: any[]) {
+  const missingIds = Array.from(
+    new Set(
+      commentsArr
+        .filter((c) => !c.profiles || !c.profiles[0]?.username)
+        .map((c) => c.author_id)
+    )
+  );
+
+  if (missingIds.length === 0) return commentsArr;
+
+  const { data: profilesData } = await supabase
+    .from("profiles")
+    .select("id,username")
+    .in("id", missingIds);
+
+  const profileMap: Record<string, string> = {};
+  profilesData?.forEach((p: any) => {
+    profileMap[p.id] = p.username;
+  });
+
+  return commentsArr.map((c) => ({
+    ...c,
+    profiles: c.profiles && c.profiles.length > 0
+      ? c.profiles
+      : [{ username: profileMap[c.author_id] || "Unknown" }],
+  }));
+}
 
 async function saveComment(commentId: string){
 
@@ -141,13 +190,13 @@ id,
 content,
 created_at,
 author_id,
-profiles(username)
+  profiles!comments_author_id_fkey(username)
 `)
 .eq("post_id",post.id)
 .order("created_at",{ascending:true});
 
-
-setComments(commentsData || []);
+const resolvedComments = await fillCommentUsernames(commentsData || []);
+setComments(resolvedComments || []);
 
 
 }
@@ -276,13 +325,13 @@ id,
 content,
 created_at,
 author_id,
-profiles(username)
+profiles!comments_author_id_fkey(username)
 `)
 .eq("post_id",post.id)
 .order("created_at",{ascending:true});
 
-
-setComments(data || []);
+const resolved = await fillCommentUsernames(data || []);
+setComments(resolved || []);
 
 
 }
@@ -298,7 +347,7 @@ return (
 
 <Link href={`/profile/${post.author_id}`}>
   <h1 className="text-lg font-semibold hover:underline cursor-pointer">
-    {post.profiles?.[0]?.username ?? "Unknown"}
+    {authorUsername ?? "Unknown"}
   </h1>
 </Link>
 

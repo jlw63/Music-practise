@@ -76,7 +76,7 @@ type,
 video_url,
 created_at,
 author_id,
-profiles(username)
+profiles!posts_author_id_fkey(username)
 `)
 .eq("author_id",user!.id)
 .order("created_at",{ascending:false});
