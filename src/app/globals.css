@@ -1,22 +1,21 @@
 @import "tailwindcss";
 
-:root {
+/* Theme variables applied via [data-theme] on the <html> element */
+:root,
+[data-theme="light"] {
   --background: #ffffff;
   --foreground: #171717;
+  --muted: #6b7280;
+  --surface: #ffffff;
+  --border: #e5e7eb;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+[data-theme="dark"] {
+  --background: #0a0a0a;
+  --foreground: #ededed;
+  --muted: #9ca3af;
+  --surface: #0b0b0b;
+  --border: #222327;
 }
 
 body {
@@ -24,3 +23,8 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* Utility: allow Tailwind to pick up CSS variable colors with arbitrary values */
+.bg-surface { background-color: var(--surface); }
+.text-foreground { color: var(--foreground); }
+.text-muted { color: var(--muted); }

@@ -342,7 +342,7 @@ setComments(resolved || []);
 
 return (
 
-<div className="border rounded p-4 mb-4">
+<div className="border rounded p-4 mb-4" style={{ borderColor: 'var(--border)' }}>
 
 
 <Link href={`/profile/${post.author_id}`}>
@@ -413,10 +413,11 @@ Comments
 
 <div
 key={comment.id}
-className="bg-gray-900 p-3 rounded mt-2"
+className="bg-surface text-foreground p-3 rounded mt-2 border"
+style={{ borderColor: 'var(--border)' }}
 >
 
-<p className="font-medium">
+<p className="font-medium text-foreground">
 {comment.profiles?.[0]?.username ?? "Unknown"}
 </p>
 
@@ -424,16 +425,11 @@ className="bg-gray-900 p-3 rounded mt-2"
 {editingCommentId === comment.id ? (
 
 <div>
-
-<input
-
-className="border p-2 rounded w-full mt-2"
-
-value={editComment}
-
-onChange={(e)=>setEditComment(e.target.value)}
-
-/>
+  <input
+    className="border p-2 rounded w-full mt-2 bg-surface text-foreground"
+    value={editComment}
+    onChange={(e) => setEditComment(e.target.value)}
+  />
 
 
 <button
@@ -461,13 +457,11 @@ Cancel
 </div>
 
 
-) : (
+ ) : (
 
-<>
+  <>
 
-<p>
-{comment.content}
-</p>
+    <p className="text-foreground">{comment.content}</p>
 
 
 {user?.id === comment.author_id && (
@@ -522,15 +516,13 @@ Delete
 
 <input
 
-className="border p-2 rounded w-full mt-4"
+className="border p-2 rounded w-full mt-4 bg-surface text-foreground"
 
 value={newComment}
 
 onChange={(e)=>setNewComment(e.target.value)}
 
-placeholder="Join discussion..."
-
-/>
+placeholder="Join discussion..." />
 
 
 
