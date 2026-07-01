@@ -2,11 +2,13 @@
 
 import {useState} from "react";
 import {supabase} from "../../lib/supabase";
+import { useRouter } from "next/navigation";
 
 export default function SignupPage() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [username, setUsername] = useState("");
+    const router = useRouter();
 
     async function handleSignup() {
         const {data, error} = await supabase.auth.signUp({
@@ -30,6 +32,7 @@ export default function SignupPage() {
         }
         
         console.log("User created successfully");
+        router.push("/");
     }
     return (
         <div className="flex flex-col gap-4 max-w-md mx-auto">
@@ -52,8 +55,7 @@ export default function SignupPage() {
             onChange={(e) => setUsername(e.target.value)}
             />
 
-            <button className="border text-white p-2 rounded 
-            hover:bg-white cursor-pointer transition hover:text-black hover:scale-105"
+            <button className="bg-indigo-600 text-white p-2 rounded hover:bg-indigo-700 transition"
                 onClick={handleSignup}>
                 Sign Up
             </button>

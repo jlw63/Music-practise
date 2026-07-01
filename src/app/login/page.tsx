@@ -2,10 +2,12 @@
 
 import {useState} from "react";
 import {supabase} from "../../lib/supabase";
+import { useRouter } from "next/navigation";
 
 export default function LoginPage() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const router = useRouter();
 
     async function handleLogin() {
         const {data, error} = await supabase.auth.signInWithPassword({
@@ -16,6 +18,7 @@ export default function LoginPage() {
             return;
         }
         console.log("User logged in:", data);
+        router.push("/");
     }
     return (
         <div className="flex flex-col gap-4 max-w-md mx-auto">
@@ -32,7 +35,7 @@ export default function LoginPage() {
         onChange={(e)=> setPassword(e.target.value)}
         onKeyDown={(e)=> e.key === "Enter" && handleLogin()}/>
 
-        <button className="border text-white p-2 rounded hover:bg-white cursor-pointer transition hover:text-black hover:scale-105"
+        <button className="bg-indigo-600 text-white p-2 rounded hover:bg-indigo-700 transition"
         onClick={handleLogin}>
             Login
         </button>
