@@ -247,14 +247,14 @@ if(following){
 
 
 
-await supabase
-.from("followers")
-.delete()
-.eq("following_id",userId)
-.eq("follower_id",user.id);
+const { error: deleteError } = await supabase
+  .from("followers")
+  .delete()
+  .eq("following_id", userId)
+  .eq("follower_id", user.id);
 
-if(Error){
-  console.log(Error);
+if (deleteError) {
+  console.log(deleteError);
   return;
 }
 
@@ -279,32 +279,29 @@ else{
 
 
 
-await supabase
-.from("followers")
-.insert({
+const { error } = await supabase
+  .from("followers")
+  .insert({
+    follower_id: user.id,
+    following_id: userId,
+  });
 
-follower_id:user.id,
-
-following_id:userId
-
-});
-
-if(Error){
-  console.log(Error);
+if (error) {
+  console.log(error);
   return;
 }
 
-await supabase
-.from("notifications")
-.insert({
+const { error: notificationError } = await supabase
+  .from("notifications")
+  .insert({
+    receiver_id: userId,
+    sender_id: user.id,
+    type: "follow",
+  });
 
-receiver_id:userId,
-
-sender_id:user.id,
-
-type:"follow"
-
-});
+if (notificationError) {
+  console.log(notificationError);
+}
 
 setFollowing(true);
 

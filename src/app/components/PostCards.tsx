@@ -236,30 +236,31 @@ liked:false
 else{
 
 
-await supabase
-.from("likes")
-.insert({
-post_id:post.id,
-user_id:user.id
-});
+const { error: likeError } = await supabase
+  .from("likes")
+  .insert({
+    post_id: post.id,
+    user_id: user.id,
+  });
 
+if (likeError) {
+  console.log("Like insert error:", likeError);
+  return;
+}
 
-if(post.author_id !== user.id){
+if (post.author_id !== user.id) {
+  const { error: notificationError } = await supabase
+    .from("notifications")
+    .insert({
+      receiver_id: post.author_id,
+      sender_id: user.id,
+      type: "like",
+      post_id: post.id,
+    });
 
-await supabase
-.from("notifications")
-.insert({
-
-receiver_id:post.author_id,
-
-sender_id:user.id,
-
-type:"like",
-
-post_id:post.id
-
-});
-
+  if (notificationError) {
+    console.log("Like notification error:", notificationError);
+  }
 }
 
 
@@ -282,35 +283,32 @@ return;
 }
 
 
-await supabase
-.from("comments")
-.insert({
+const { error: commentError } = await supabase
+  .from("comments")
+  .insert({
+    post_id: post.id,
+    author_id: user.id,
+    content: newComment,
+  });
 
-post_id:post.id,
+if (commentError) {
+  console.log("Comment insert error:", commentError);
+  return;
+}
 
-author_id:user.id,
+if (post.author_id !== user.id) {
+  const { error: notificationError } = await supabase
+    .from("notifications")
+    .insert({
+      receiver_id: post.author_id,
+      sender_id: user.id,
+      type: "comment",
+      post_id: post.id,
+    });
 
-content:newComment
-
-});
-
-
-if(post.author_id !== user.id){
-
-await supabase
-.from("notifications")
-.insert({
-
-receiver_id:post.author_id,
-
-sender_id:user.id,
-
-type:"comment",
-
-post_id:post.id
-
-});
-
+  if (notificationError) {
+    console.log("Comment notification error:", notificationError);
+  }
 }
 
 

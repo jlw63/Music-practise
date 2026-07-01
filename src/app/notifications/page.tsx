@@ -79,17 +79,17 @@ return;
 
 
 
-const formatted = data?.map((n:any)=>({
-
-id:n.id,
-
-type:n.type,
-
-created_at:n.created_at,
-
-sender:n.profiles
-
-
+const formatted = data?.map((n:any) => ({
+  id: n.id,
+  type: n.type,
+  created_at: n.created_at,
+  sender: {
+    username:
+      n.profiles?.username ||
+      n.profiles?.[0]?.username ||
+      n.sender_id ||
+      "Unknown",
+  },
 })) || [];
 
 

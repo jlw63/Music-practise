@@ -13,7 +13,7 @@ export default function CreatePage() {
     const router = useRouter();
     if (loading) return <p>Loading...</p>;
     if (!user) {
-        router.push("/login");
+        router.push("/");
         return null;
     }
 function convertToEmbedUrl(url: string) {
