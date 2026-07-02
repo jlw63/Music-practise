@@ -12,22 +12,25 @@ export function NavBar() {
 
   const linkClass = (href: string) => {
     const isActive = pathname === href || (href !== "/" && pathname?.startsWith(href));
-    return `px-3 py-2 rounded-md transition ${isActive ? "text-indigo-700 font-semibold bg-indigo-100" : "text-foreground hover:text-indigo-700 hover:bg-indigo-100"}`;
+    return `px-3 py-2 rounded-md transition-colors ${isActive ? "text-indigo-700 font-semibold bg-indigo-100 dark:text-indigo-200 dark:bg-indigo-900" : "text-foreground hover:text-indigo-800 hover:bg-indigo-200 dark:hover:text-indigo-200 dark:hover:bg-white/10"}`;
   };
 
   return (
-    <nav className="sticky top-0 z-50 border-b border-[var(--border)] bg-[var(--surface)]">
-      <div className="grid w-full px-6 grid-cols-[max-content_1fr_max-content] items-center justify-items-stretch gap-4 py-3">
+    // Added relative here so the absolute center positioning works perfectly
+    <nav className="sticky top-0 z-50 border-b border-[var(--border)] bg-[var(--surface)] relative">
+      {/* Changed from grid to a flex layout with justify-between */}
+      <div className="flex w-full px-6 items-center justify-between gap-4 py-3 h-14">
         
         {/* 1. LEFT POSITION: MusicSocial Logo */}
-        <div className="justify-self-start flex items-center gap-3">
+        <div className="flex items-center gap-3 z-10">
           <Link href="/music-social" className="text-xl font-semibold tracking-tight text-indigo-500 hover:text-indigo-400">
             MusicSocial
           </Link>
         </div>
 
-        {/* 2. MIDDLE POSITION: Navigation Links (Perfectly Centered) */}
-        <div className="hidden sm:flex justify-self-center items-center gap-2 sm:gap-4">
+        {/* 2. MIDDLE POSITION: Dead Centered Links */}
+        {/* Using absolute positioning breaks it out of the side layouts to ensure true screen centering */}
+        <div className="hidden sm:flex items-center gap-2 sm:gap-4 absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
           <Link href="/" className={linkClass("/")}>
             Latest
           </Link>
@@ -47,8 +50,8 @@ export function NavBar() {
           </Link>
         </div>
 
-        {/* 3. RIGHT POSITION: Theme Toggle & User Info / Logout */}
-        <div className="justify-self-end flex items-center gap-3">
+        {/* 3. RIGHT POSITION: Theme Toggle & User Info */}
+        <div className="flex items-center gap-3 z-10">
           <button
             onClick={toggleTheme}
             aria-label="Toggle theme"
@@ -59,7 +62,7 @@ export function NavBar() {
 
           {!user ? (
             <>
-              <Link href="/login" className="text-sm text-foreground hover:text-indigo-700 px-3 py-2 rounded-md transition">
+              <Link href="/login" className="text-sm text-foreground hover:text-indigo-700 dark:hover:text-indigo-200 px-3 py-2 rounded-md transition">
                 Login
               </Link>
               <Link href="/signup" className="bg-indigo-600 text-white text-sm px-3 py-2 rounded-md hover:bg-indigo-700 transition">
@@ -68,8 +71,7 @@ export function NavBar() {
             </>
           ) : (
             <>
-              {/* Added the user email display back here on the right */}
-              <Link href="/profile" className="text-sm text-foreground hover:text-indigo-700 px-3 py-2 rounded-md transition">
+              <Link href="/profile" className="text-sm text-foreground hover:text-indigo-700 dark:hover:text-indigo-200 px-3 py-2 rounded-md transition">
                 {user.email}
               </Link>
               <button
