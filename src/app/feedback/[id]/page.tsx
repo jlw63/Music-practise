@@ -15,9 +15,7 @@ type FeedbackPost = {
   created_at: string;
   author_id: string;
   is_anonymous?: boolean;
-  profiles?: {
-    username: string;
-  }[];
+  profiles?: { username: string }[];
 };
 
 type Comment = {
@@ -25,10 +23,16 @@ type Comment = {
   content: string;
   created_at: string;
   author_id: string;
-  profiles?: {
-    username: string;
-  }[];
+  profiles?: { username: string }[];
 };
+
+const RATING_CATEGORIES = [
+  { key: "overall", label: "Overall rating" },
+  { key: "accuracy", label: "Accuracy", hint: "Correct notes & rhythm" },
+  { key: "dynamics", label: "Dynamics" },
+  { key: "interpretation", label: "Interpretation" },
+  { key: "technique", label: "Technique" },
+] as const;
 
 export default function FeedbackDetailPage() {
   const params = useParams();
@@ -122,179 +126,289 @@ export default function FeedbackDetailPage() {
     fetchComments();
   }, [postId]);
 
-function handleRatingChange(category: keyof typeof ratings, nextRating: number) {
-      setRatings((prev) => {
-        const next = { ...prev, [category]: nextRating };
-        window.localStorage.setItem(`feedback-ratings-${postId}`, JSON.stringify(next));
-        return next;
-      });
+  function handleRatingChange(category: keyof typeof ratings, nextRating: number) {
+    setRatings((prev) => {
+      const next = { ...prev, [category]: nextRating };
+      window.localStorage.setItem(`feedback-ratings-${postId}`, JSON.stringify(next));
+      return next;
+    });
+  }
+
+  async function handleRatingSubmit() {
+    if (!user || !postId) return;
+    const allRated = Object.values(ratings).every((value) => value !== null);
+    if (!allRated) return;
+
+    setRatingSubmitting(true);
+
+    try {
+      await supabase.from("feedback_ratings").upsert(
+        {
+          post_id: postId,
+          user_id: user.id,
+          rating: ratings.overall,
+        },
+        { onConflict: "post_id,user_id" }
+      );
+    } catch (error) {
+      console.log("Rating save skipped:", error);
     }
 
-    async function handleRatingSubmit() {
-      if (!user || !postId) return;
-      const allRated = Object.values(ratings).every((value) => value !== null);
-      if (!allRated) return;
+    setRatingSubmitting(false);
+  }
 
-      setRatingSubmitting(true);
+  async function handleCommentSubmit() {
+    if (!user || !commentText.trim() || !post) return;
 
-      try {
-        await supabase.from("feedback_ratings").upsert(
-          {
-            post_id: postId,
-            user_id: user.id,
-            rating: ratings.overall,
-          },
-          { onConflict: "post_id,user_id" }
-        );
-      } catch (error) {
-        console.log("Rating save skipped:", error);
-      }
-
-      setRatingSubmitting(false);
-    }
-
-    async function handleCommentSubmit() {
-      if (!user || !commentText.trim() || !post) return;
-
-      setCommentSubmitting(true);
+    setCommentSubmitting(true);
 
     const { error: commentError } = await supabase.from("comments").insert({
-        post_id: post.id,
-        author_id: user.id,
-        content: commentText.trim(),
-      });
+      post_id: post.id,
+      author_id: user.id,
+      content: commentText.trim(),
+    });
 
-      if (!commentError) {
-        const { data: latestComment } = await supabase
-          .from("comments")
-          .select(`
-            id,
-            content,
-            created_at,
-            author_id,
-            profiles!comments_author_id_fkey(username)
-          `)
-          .eq("post_id", post.id)
-          .order("created_at", { ascending: false })
-          .limit(1)
-          .single();
+    if (!commentError) {
+      const { data: latestComment } = await supabase
+        .from("comments")
+        .select(`
+          id,
+          content,
+          created_at,
+          author_id,
+          profiles!comments_author_id_fkey(username)
+        `)
+        .eq("post_id", post.id)
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .single();
 
-        if (latestComment) {
-          setComments((prev) => [...prev, latestComment]);
-        }
-        setCommentText("");
+      if (latestComment) {
+        setComments((prev) => [...prev, latestComment]);
       }
-
-      setCommentSubmitting(false);
+      setCommentText("");
     }
-  if (loading) return <p>Loading feedback...</p>;
-  if (!post) return <p>Feedback not found.</p>;
+
+    setCommentSubmitting(false);
+  }
+
+  if (loading) {
+    return (
+      <div className="flex min-h-[50vh] items-center justify-center">
+        <p className="text-sm text-[var(--muted)]">Loading feedback...</p>
+      </div>
+    );
+  }
+  if (!post) {
+    return (
+      <div className="flex min-h-[50vh] items-center justify-center">
+        <p className="text-sm text-[var(--muted)]">Feedback not found.</p>
+      </div>
+    );
+  }
 
   const authorName = post.profiles?.[0]?.username || "Unknown";
+  const ratedCount = Object.values(ratings).filter((v) => v !== null).length;
+  const allRated = ratedCount === RATING_CATEGORIES.length;
+
+  const scrollTo = (id: string) => {
+    document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
+
+  const cardClass =
+    "rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-6 shadow-sm";
 
   return (
-    <div className="max-w-3xl mx-auto space-y-6">
-      <Link href="/feedback" className="text-sm text-indigo-600 hover:underline">
+    <div className="mx-auto max-w-3xl space-y-6 pb-16">
+      <Link
+        href="/feedback"
+        className="inline-flex items-center gap-1 text-sm font-medium text-indigo-600 transition hover:gap-1.5 dark:text-indigo-400"
+      >
         ← Back to feedback feed
       </Link>
 
-      <div className="rounded-lg border p-6">
-        <div className="flex items-center justify-between gap-3">
-          <h1 className="text-2xl font-semibold">{post.title}</h1>
-          <span className="text-sm text-gray-500">by {authorName}</span>
+      {/* Sticky section nav */}
+      <div className="sticky top-16 z-10 flex flex-wrap items-center gap-2 rounded-full border border-[var(--border)] bg-[var(--surface)]/90 backdrop-blur-md px-2 py-1.5 shadow-sm">
+        <button
+          onClick={() => scrollTo("overview")}
+          className="rounded-full px-3 py-1.5 text-xs font-medium text-[var(--muted)] transition hover:bg-indigo-500/10 hover:text-indigo-600 dark:hover:text-indigo-400"
+        >
+          Overview
+        </button>
+        <button
+          onClick={() => scrollTo("ratings")}
+          className="flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium text-[var(--muted)] transition hover:bg-indigo-500/10 hover:text-indigo-600 dark:hover:text-indigo-400"
+        >
+          Ratings
+          <span
+            className={`rounded-full px-1.5 py-0.5 text-[10px] font-semibold ${
+              allRated
+                ? "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400"
+                : "bg-indigo-500/15 text-indigo-600 dark:text-indigo-400"
+            }`}
+          >
+            {ratedCount}/{RATING_CATEGORIES.length}
+          </span>
+        </button>
+        <button
+          onClick={() => scrollTo("comments")}
+          className="flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium text-[var(--muted)] transition hover:bg-indigo-500/10 hover:text-indigo-600 dark:hover:text-indigo-400"
+        >
+          Comments
+          <span className="rounded-full bg-[var(--border)]/40 px-1.5 py-0.5 text-[10px] font-semibold text-[var(--muted)]">
+            {comments.length}
+          </span>
+        </button>
+      </div>
+
+      {/* Overview */}
+      <div id="overview" className={cardClass}>
+        <div className="flex items-start justify-between gap-3">
+          <h1 className="text-2xl font-bold tracking-tight text-[var(--foreground)]">
+            {post.title}
+          </h1>
+          <span className="whitespace-nowrap text-sm text-[var(--muted)]">
+            by <span className="font-medium text-[var(--foreground)]">{authorName}</span>
+          </span>
         </div>
-        <p className="mt-4 text-gray-700">{post.content}</p>
+        <p className="mt-4 text-sm leading-relaxed text-[var(--foreground)]/90">
+          {post.content}
+        </p>
 
         {post.video_url && (
           <div className="mt-6">
-            <h2 className="mb-2 font-semibold">Video</h2>
-            <div className="aspect-video overflow-hidden rounded-lg border">
-              <iframe src={post.video_url} title={post.title} className="h-full w-full" allowFullScreen />
+            <h2 className="mb-2 text-xs font-semibold uppercase tracking-wider text-[var(--muted)]">
+              Video
+            </h2>
+            <div className="aspect-video overflow-hidden rounded-xl border border-[var(--border)]">
+              <iframe
+                src={post.video_url}
+                title={post.title}
+                className="h-full w-full"
+                allowFullScreen
+              />
             </div>
           </div>
         )}
       </div>
 
-      <div className="rounded-lg border p-6 space-y-4">
-        <h2 className="text-xl font-semibold">Rate this feedback</h2>
-        <p className="text-sm text-gray-500">1 = needs improvement, 10 = basically perfect</p>
+      {/* Ratings */}
+      <div id="ratings" className={cardClass + " space-y-1"}>
+        <div className="flex items-center justify-between">
+          <h2 className="text-lg font-bold text-[var(--foreground)]">Rate this feedback</h2>
+          <span className="text-xs font-medium text-[var(--muted)]">
+            1 = needs improvement · 10 = basically perfect
+          </span>
+        </div>
 
-        {[
-          { key: "overall", label: "Overall rating" },
-          { key: "accuracy", label: "Accuracy - correct notes & rhythm" },
-          { key: "dynamics", label: "Dynamics" },
-          { key: "interpretation", label: "Interpretation" },
-          { key: "technique", label: "Technique" },
-        ].map((category) => (
-          <div key={category.key} className="pt-4">
-            <div className="flex items-center justify-between gap-3">
-              <h3 className="text-lg font-medium">{category.label}</h3>
-              <span className="text-sm text-gray-500">
-                {ratings[category.key as keyof typeof ratings] !== null ? `${ratings[category.key as keyof typeof ratings]}/10` : "Not rated"}
-              </span>
-            </div>
-            <div className="mt-3 flex flex-wrap gap-2">
-              {Array.from({ length: 10 }, (_, index) => index + 1).map((value) => (
-                <button
-                  key={value}
-                  type="button"
-                  onClick={() => handleRatingChange(category.key as keyof typeof ratings, value)}
-                  className={`rounded px-3 py-2 text-sm ${ratings[category.key as keyof typeof ratings] === value ? "bg-indigo-600 text-white" : "border bg-white text-gray-700 hover:border-indigo-400 hover:text-indigo-700"}`}
-                >
-                  {value}
-                </button>
-              ))}
-            </div>
-          </div>
-        ))}
+        <div className="divide-y divide-[var(--border)]">
+          {RATING_CATEGORIES.map((category) => {
+            const value = ratings[category.key];
+            return (
+              <div key={category.key} className="py-4">
+                <div className="flex items-center justify-between gap-3">
+                  <div>
+                    <h3 className="text-sm font-semibold text-[var(--foreground)]">
+                      {category.label}
+                    </h3>
+                    {"hint" in category && category.hint && (
+                      <p className="text-xs text-[var(--muted)]">{category.hint}</p>
+                    )}
+                  </div>
+                  <span
+                    className={`rounded-full px-2 py-0.5 text-xs font-semibold ${
+                      value !== null
+                        ? "bg-indigo-500/15 text-indigo-600 dark:text-indigo-400"
+                        : "bg-[var(--border)]/30 text-[var(--muted)]"
+                    }`}
+                  >
+                    {value !== null ? `${value}/10` : "Not rated"}
+                  </span>
+                </div>
+                <div className="mt-3 flex flex-wrap gap-1.5">
+                  {Array.from({ length: 10 }, (_, i) => i + 1).map((n) => (
+                    <button
+                      key={n}
+                      type="button"
+                      onClick={() => handleRatingChange(category.key, n)}
+                      className={`h-8 w-8 rounded-lg text-xs font-semibold transition-all duration-150 ${
+                        value === n
+                          ? "bg-gradient-to-br from-indigo-600 to-violet-600 text-white shadow-sm scale-105"
+                          : "border border-[var(--border)] bg-[var(--surface)] text-[var(--muted)] hover:border-indigo-400 hover:text-indigo-600 dark:hover:text-indigo-400"
+                      }`}
+                    >
+                      {n}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            );
+          })}
+        </div>
 
-        <button
-          type="button"
-          onClick={handleRatingSubmit}
-          disabled={ratingSubmitting || !Object.values(ratings).every((value) => value !== null)}
-          className="rounded bg-indigo-600 px-4 py-2 text-sm text-white hover:bg-indigo-700 disabled:opacity-60"
-        >
-          {ratingSubmitting ? "Saving ratings..." : "Submit ratings"}
-        </button>
-        {!Object.values(ratings).every((value) => value !== null) && (
-          <p className="text-sm text-amber-500">Please rate every category before submitting.</p>
-        )}
+        <div className="pt-2">
+          <button
+            type="button"
+            onClick={handleRatingSubmit}
+            disabled={ratingSubmitting || !allRated}
+            className="rounded-lg bg-gradient-to-r from-indigo-600 to-violet-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-all duration-200 hover:shadow-md hover:shadow-indigo-600/20 active:scale-95 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:shadow-sm"
+          >
+            {ratingSubmitting ? "Saving ratings..." : "Submit ratings"}
+          </button>
+          {!allRated && (
+            <p className="mt-2 text-xs text-amber-500">
+              Please rate every category before submitting.
+            </p>
+          )}
+        </div>
       </div>
 
-      <div className="rounded-lg border p-6">
-        <h2 className="text-xl font-semibold">Comments</h2>
+      {/* Comments */}
+      <div id="comments" className={cardClass}>
+        <h2 className="text-lg font-bold text-[var(--foreground)]">Comments</h2>
 
         {user ? (
-          <div className="mt-4 space-y-3">
-            <div>
-              <p className="text-sm font-medium">What did you like? What could be better? What was your favourite moment? (Add timestamps if you can.)</p>
-            </div>
+          <div className="mt-4 space-y-2.5">
+            <p className="text-xs font-medium text-[var(--muted)]">
+              What did you like? What could be better? What was your favourite moment? (Add
+              timestamps if you can.)
+            </p>
             <textarea
               value={commentText}
               onChange={(e) => setCommentText(e.target.value)}
-              className="min-h-24 w-full rounded border p-3"
+              className="min-h-24 w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] px-4 py-3 text-sm text-[var(--foreground)] outline-none transition-all placeholder:text-[var(--muted)]/70 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/30"
               placeholder="Write your feedback here..."
             />
             <button
               onClick={handleCommentSubmit}
-              disabled={commentSubmitting}
-              className="rounded bg-indigo-600 px-4 py-2 text-sm text-white hover:bg-indigo-700 disabled:opacity-60"
+              disabled={commentSubmitting || !commentText.trim()}
+              className="rounded-lg bg-gradient-to-r from-indigo-600 to-violet-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-all duration-200 hover:shadow-md hover:shadow-indigo-600/20 active:scale-95 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:shadow-sm"
             >
               {commentSubmitting ? "Posting comment..." : "Submit comment"}
             </button>
           </div>
         ) : (
-          <p className="mt-4 text-sm text-gray-500">Log in to leave a comment.</p>
+          <p className="mt-4 text-sm text-[var(--muted)]">Log in to leave a comment.</p>
         )}
 
         <div className="mt-6 space-y-3">
+          {comments.length === 0 && (
+            <p className="text-sm text-[var(--muted)]">No comments yet — be the first.</p>
+          )}
           {comments.map((comment) => (
-            <div key={comment.id} className="rounded border p-3">
-              <div className="flex items-center justify-between">
-                <p className="font-medium">{comment.profiles?.[0]?.username || "Unknown"}</p>
-                <span className="text-xs text-gray-500">{new Date(comment.created_at).toLocaleString()}</span>
+            <div
+              key={comment.id}
+              className="border-l-2 border-[var(--border)] pl-3 py-1.5 transition-colors hover:border-indigo-400/60"
+            >
+              <div className="flex items-center justify-between gap-3">
+                <p className="text-sm font-medium text-[var(--foreground)]">
+                  {comment.profiles?.[0]?.username || "Unknown"}
+                </p>
+                <span className="text-xs text-[var(--muted)]">
+                  {new Date(comment.created_at).toLocaleString()}
+                </span>
               </div>
-              <p className="mt-2 text-sm text-gray-700">{comment.content}</p>
+              <p className="mt-1 text-sm text-[var(--foreground)]/90">{comment.content}</p>
             </div>
           ))}
         </div>
