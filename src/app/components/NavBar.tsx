@@ -34,6 +34,10 @@ export function NavBar() {
             🔔
           </Link>
 
+          <Link href="/feedback" className="text-foreground hover:text-indigo-500 px-3 py-2 rounded-md transition">
+            Feedback
+          </Link>
+
           <Link href="/create" className="hidden md:inline text-foreground hover:text-indigo-500 px-3 py-2 rounded-md transition">
             Create
           </Link>
