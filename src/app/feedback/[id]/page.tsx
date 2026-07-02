@@ -266,11 +266,14 @@ function handleRatingChange(category: keyof typeof ratings, nextRating: number) 
 
         {user ? (
           <div className="mt-4 space-y-3">
+            <div>
+              <p className="text-sm font-medium">What did you like? What could be better? What was your favourite moment? (Add timestamps if you can.)</p>
+            </div>
             <textarea
               value={commentText}
               onChange={(e) => setCommentText(e.target.value)}
               className="min-h-24 w-full rounded border p-3"
-              placeholder="What did they do well? What can be improved? Your fav moment (optional) — add timestamps if possible."
+              placeholder="Write your feedback here..."
             />
             <button
               onClick={handleCommentSubmit}
