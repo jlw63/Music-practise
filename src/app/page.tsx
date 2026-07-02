@@ -24,41 +24,36 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
 
 
-useEffect(()=>{
+useEffect(() => {
 
-async function fetchPosts(){
+  async function fetchPosts() {
+    const { data, error } = await supabase
+      .from("posts")
+      .select(`
+        id,
+        title,
+        content,
+        type,
+        video_url,
+        created_at,
+        author_id,
+        profiles!posts_author_id_fkey(username)
+      `)
+      .in("type", ["video", "discussion"])
+      .order("created_at", { ascending: false });
 
-const {data,error}= await supabase
-.from("posts")
-.select(`
-id,
-title,
-content,
-type,
-video_url,
-created_at,
-author_id,
-  profiles!posts_author_id_fkey(username)
-`)
-.order("created_at",{ascending:false});
+    if (error) {
+      console.log(error);
+      setLoading(false);
+      return;
+    }
 
+    setPosts(data || []);
+    setLoading(false);
+  }
 
-if(error){
-  console.log(error);
-  setLoading(false);
-  return;
-}
-
-setPosts(data || []);
-setLoading(false);
-
-}
-
-
-fetchPosts();
-
-
-},[]);
+  fetchPosts();
+}, []);
 return (
   <div className="max-w-3xl mx-auto space-y-6">
 

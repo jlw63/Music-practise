@@ -35,7 +35,7 @@ export default function CreatePage() {
             <h1 className="text-2xl font-semibold">Create Post</h1>
 
             <input
-                className="border p-2 rounded"
+                className="border p-2 rounded bg-transparent text-foreground"
                 placeholder="Title"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
@@ -44,7 +44,7 @@ export default function CreatePage() {
             <select
                 value={postType}
                 onChange={(e) => setPostType(e.target.value as PostType)}
-                className="bg-black text-white border p-2 rounded focus:outline-none focus:ring-2 focus:ring-white"
+                className="border p-2 rounded bg-[var(--surface)] text-foreground focus:outline-none focus:ring-2 focus:ring-indigo-500"
             >
                 <option value="video">Video</option>
                 <option value="discussion">Discussion</option>
@@ -56,14 +56,14 @@ export default function CreatePage() {
                     <select
                         value={visibility}
                         onChange={(e) => setVisibility(e.target.value as VisibilityOption)}
-                        className="border p-2 rounded"
+                        className="border p-2 rounded bg-[var(--surface)] text-foreground"
                     >
                         <option value="show">Show username</option>
                         <option value="anonymous">Post anonymously</option>
                     </select>
 
                     <textarea
-                        className="border p-2 rounded h-32 resize-none"
+                        className="border p-2 rounded h-32 resize-none bg-transparent text-foreground"
                         placeholder="Description"
                         value={description}
                         onChange={(e) => setDescription(e.target.value)}
@@ -73,7 +73,7 @@ export default function CreatePage() {
 
             {(postType === "video" || postType === "feedback") && (
                 <input
-                    className="border p-2 rounded"
+                    className="border p-2 rounded bg-transparent text-foreground"
                     placeholder="Optional video URL"
                     value={videoUrl}
                     onChange={(e) => setVideoUrl(e.target.value)}
@@ -82,7 +82,7 @@ export default function CreatePage() {
 
             {postType !== "feedback" && (
                 <textarea
-                    className="border p-2 rounded h-32 resize-none"
+                    className="border p-2 rounded h-32 resize-none bg-transparent text-foreground"
                     placeholder="Content"
                     value={content}
                     onChange={(e) => setContent(e.target.value)}

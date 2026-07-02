@@ -87,10 +87,10 @@ export default function FeedbackFeedPage() {
             >
               <div className="flex items-center justify-between gap-3">
                 <div>
-                  <h2 className="text-lg font-semibold">{post.title}</h2>
-                  <p className="mt-1 text-sm text-gray-600">{post.content}</p>
+                  <h2 className="text-lg font-semibold text-foreground">{post.title}</h2>
+                  <p className="mt-1 text-sm text-muted">{post.content}</p>
                 </div>
-                <span className="text-xs text-gray-500">by {authorName}</span>
+                <span className="text-xs text-muted">by {authorName}</span>
               </div>
             </Link>
           );
