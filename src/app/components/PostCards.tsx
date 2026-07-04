@@ -1,6 +1,7 @@
 "use client";
 
 import { useAuth } from "@/context/AuthContext";
+import { useToast } from "@/context/ToastContext";
 import { supabase } from "@/lib/supabase";
 import { useEffect, useState } from "react";
 import Link from "next/link";
@@ -30,6 +31,7 @@ type Props = {
 
 export default function PostCard({ post }: Props) {
   const { user } = useAuth();
+  const { toast } = useToast();
 
   const [authorUsername, setAuthorUsername] = useState<string | null>(
     post.profiles?.[0]?.username || null
@@ -108,14 +110,28 @@ export default function PostCard({ post }: Props) {
   }
 
   async function deleteComment(commentId: string) {
-    const { error } = await supabase.from("comments").delete().eq("id", commentId);
+    const { data, error } = await supabase
+      .from("comments")
+      .delete()
+      .eq("id", commentId)
+      .select();
 
     if (error) {
-      console.log(error);
+      toast("Could not delete comment: " + error.message, "error");
+      return;
+    }
+
+    // RLS can block a delete without returning an error — 0 rows come back
+    if (!data || data.length === 0) {
+      toast(
+        "Comment was not deleted — the 'comments' table is missing a DELETE policy in Supabase.",
+        "error"
+      );
       return;
     }
 
     setComments((prev) => prev.filter((comment) => comment.id !== commentId));
+    toast("Comment deleted", "success");
   }
 
   useEffect(() => {
@@ -149,7 +165,7 @@ export default function PostCard({ post }: Props) {
 
   async function handleLike() {
     if (!user) {
-      alert("Login first");
+      toast("Login to like posts", "info");
       return;
     }
 
@@ -192,7 +208,7 @@ export default function PostCard({ post }: Props) {
 
   async function handleComment() {
     if (!user) {
-      alert("Login first");
+      toast("Login to join the discussion", "info");
       return;
     }
 

@@ -28,3 +28,10 @@ body {
 .bg-surface { background-color: var(--surface); }
 .text-foreground { color: var(--foreground); }
 .text-muted { color: var(--muted); }
+
+/* Toast slide-in */
+@keyframes toast-in {
+  from { opacity: 0; transform: translateY(8px) scale(0.97); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+.toast-enter { animation: toast-in 0.2s ease-out; }
