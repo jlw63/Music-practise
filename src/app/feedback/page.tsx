@@ -13,6 +13,9 @@ type FeedbackPost = {
   created_at: string;
   author_id: string;
   is_anonymous?: boolean;
+  genre?: string | null;
+  instruments?: string[] | null;
+  status?: "wip" | "finished" | null;
   profiles?: {
     username: string;
   }[];
@@ -34,6 +37,9 @@ export default function FeedbackFeedPage() {
           video_url,
           created_at,
           author_id,
+          genre,
+          instruments,
+          status,
           profiles!posts_author_id_fkey(username)
         `)
         .eq("type", "feedback")
@@ -89,6 +95,28 @@ export default function FeedbackFeedPage() {
                 <div>
                   <h2 className="text-lg font-semibold text-foreground">{post.title}</h2>
                   <p className="mt-1 text-sm text-muted">{post.content}</p>
+                  {(post.genre || (post.instruments && post.instruments.length > 0) || post.status === "wip") && (
+                    <div className="mt-2 flex flex-wrap gap-1.5">
+                      {post.status === "wip" && (
+                        <span className="rounded-full bg-amber-500/10 px-3 py-1 text-xs font-medium text-amber-600 dark:text-amber-400">
+                          WIP
+                        </span>
+                      )}
+                      {post.genre && (
+                        <span className="rounded-full bg-violet-500/10 px-3 py-1 text-xs font-medium text-violet-600 dark:text-violet-400">
+                          {post.genre}
+                        </span>
+                      )}
+                      {post.instruments?.map((inst) => (
+                        <span
+                          key={inst}
+                          className="rounded-full bg-indigo-500/10 px-3 py-1 text-xs font-medium text-indigo-600 dark:text-indigo-400"
+                        >
+                          {inst}
+                        </span>
+                      ))}
+                    </div>
+                  )}
                 </div>
                 <span className="text-xs text-muted">by {authorName}</span>
               </div>

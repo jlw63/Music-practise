@@ -17,10 +17,18 @@ type PostResult = {
   content: string;
   type: string;
   created_at: string;
+  genre?: string | null;
+  instruments?: string[] | null;
+  status?: "wip" | "finished" | null;
 };
+
+type StatusFilter = "any" | "wip" | "finished";
 
 export default function SearchPage() {
   const [query, setQuery] = useState("");
+  const [genreFilter, setGenreFilter] = useState("");
+  const [instrumentFilter, setInstrumentFilter] = useState("");
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>("any");
   const [users, setUsers] = useState<UserResult[]>([]);
   const [posts, setPosts] = useState<PostResult[]>([]);
   const [searching, setSearching] = useState(false);
@@ -29,7 +37,11 @@ export default function SearchPage() {
   // debounced live search
   useEffect(() => {
     const q = query.trim();
-    if (q.length < 2) {
+    const genre = genreFilter.trim();
+    const instrument = instrumentFilter.trim();
+    const hasFilters = genre.length > 0 || instrument.length > 0 || statusFilter !== "any";
+
+    if (q.length < 2 && !hasFilters) {
       setUsers([]);
       setPosts([]);
       setSearched(false);
@@ -38,18 +50,34 @@ export default function SearchPage() {
 
     setSearching(true);
     const handle = setTimeout(async () => {
+      let postQuery = supabase
+        .from("posts")
+        .select("id, title, content, type, created_at, genre, instruments, status")
+        .order("created_at", { ascending: false })
+        .limit(10);
+
+      if (q.length >= 2) {
+        postQuery = postQuery.or(`title.ilike.%${q}%,content.ilike.%${q}%`);
+      }
+      if (genre.length > 0) {
+        postQuery = postQuery.ilike("genre", `%${genre}%`);
+      }
+      if (instrument.length > 0) {
+        postQuery = postQuery.contains("instruments", [instrument]);
+      }
+      if (statusFilter !== "any") {
+        postQuery = postQuery.eq("status", statusFilter);
+      }
+
       const [userRes, postRes] = await Promise.all([
-        supabase
-          .from("profiles")
-          .select("id, username")
-          .ilike("username", `%${q}%`)
-          .limit(10),
-        supabase
-          .from("posts")
-          .select("id, title, content, type, created_at")
-          .or(`title.ilike.%${q}%,content.ilike.%${q}%`)
-          .order("created_at", { ascending: false })
-          .limit(10),
+        q.length >= 2
+          ? supabase
+              .from("profiles")
+              .select("id, username")
+              .ilike("username", `%${q}%`)
+              .limit(10)
+          : Promise.resolve({ data: [] as UserResult[] }),
+        postQuery,
       ]);
 
       setUsers(userRes.data || []);
@@ -59,7 +87,7 @@ export default function SearchPage() {
     }, 300);
 
     return () => clearTimeout(handle);
-  }, [query]);
+  }, [query, genreFilter, instrumentFilter, statusFilter]);
 
   const noResults = searched && !searching && users.length === 0 && posts.length === 0;
 
@@ -78,6 +106,41 @@ export default function SearchPage() {
           value={query}
           onChange={(e) => setQuery(e.target.value)}
         />
+      </div>
+
+      <div className="mt-4 flex flex-wrap items-center gap-2">
+        <input
+          className="w-40 rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-sm text-[var(--foreground)] outline-none transition-all placeholder:text-[var(--muted)]/70 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/30"
+          placeholder="Genre"
+          value={genreFilter}
+          onChange={(e) => setGenreFilter(e.target.value)}
+        />
+        <input
+          className="w-40 rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-sm text-[var(--foreground)] outline-none transition-all placeholder:text-[var(--muted)]/70 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/30"
+          placeholder="Instrument"
+          value={instrumentFilter}
+          onChange={(e) => setInstrumentFilter(e.target.value)}
+        />
+        <div className="flex rounded-lg border border-[var(--border)] bg-[var(--surface)] p-1">
+          {([
+            { value: "any" as StatusFilter, label: "Any" },
+            { value: "finished" as StatusFilter, label: "Finished" },
+            { value: "wip" as StatusFilter, label: "WIP" },
+          ]).map((option) => (
+            <button
+              key={option.value}
+              type="button"
+              onClick={() => setStatusFilter(option.value)}
+              className={`rounded-md px-3 py-1.5 text-xs font-medium transition-all duration-200 ${
+                statusFilter === option.value
+                  ? "bg-indigo-600 text-white shadow-sm"
+                  : "text-[var(--muted)] hover:text-[var(--foreground)] hover:bg-indigo-500/10"
+              }`}
+            >
+              {option.label}
+            </button>
+          ))}
+        </div>
       </div>
 
       {query.trim().length > 0 && query.trim().length < 2 && (
@@ -132,6 +195,28 @@ export default function SearchPage() {
                     </span>
                   </div>
                   <p className="mt-1 line-clamp-2 text-sm text-[var(--muted)]">{post.content}</p>
+                  {(post.genre || (post.instruments && post.instruments.length > 0) || post.status === "wip") && (
+                    <div className="mt-2 flex flex-wrap gap-1.5">
+                      {post.status === "wip" && (
+                        <span className="rounded-full bg-amber-500/10 px-2.5 py-0.5 text-[11px] font-medium text-amber-600 dark:text-amber-400">
+                          WIP
+                        </span>
+                      )}
+                      {post.genre && (
+                        <span className="rounded-full bg-violet-500/10 px-2.5 py-0.5 text-[11px] font-medium text-violet-600 dark:text-violet-400">
+                          {post.genre}
+                        </span>
+                      )}
+                      {post.instruments?.map((inst) => (
+                        <span
+                          key={inst}
+                          className="rounded-full bg-indigo-500/10 px-2.5 py-0.5 text-[11px] font-medium text-indigo-600 dark:text-indigo-400"
+                        >
+                          {inst}
+                        </span>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </Link>
             ))}

@@ -114,3 +114,13 @@ drop trigger if exists on_auth_user_created on auth.users;
 create trigger on_auth_user_created
   after insert on auth.users
   for each row execute function public.handle_new_user();
+
+-- ---------- 7. Posts: genre, instruments, WIP/finished status ----------
+alter table posts
+  add column if not exists genre text,
+  add column if not exists instruments text[],
+  add column if not exists status text not null default 'finished'
+    check (status in ('wip', 'finished'));
+
+create index if not exists posts_genre_idx on posts (genre);
+create index if not exists posts_status_idx on posts (status);

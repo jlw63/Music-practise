@@ -6,6 +6,7 @@ import { supabase } from "@/lib/supabase";
 
 type PostType = "video" | "discussion" | "feedback";
 type VisibilityOption = "show" | "anonymous";
+type StatusOption = "wip" | "finished";
 
 const POST_TYPES: { value: PostType; label: string; icon: string }[] = [
     { value: "video", label: "Video", icon: "🎥" },
@@ -21,6 +22,9 @@ export default function CreatePage() {
     const [postType, setPostType] = useState<PostType>("video");
     const [videoUrl, setVideoUrl] = useState("");
     const [visibility, setVisibility] = useState<VisibilityOption>("show");
+    const [genre, setGenre] = useState("");
+    const [instruments, setInstruments] = useState("");
+    const [status, setStatus] = useState<StatusOption>("finished");
     const router = useRouter();
 
     useEffect(() => {
@@ -95,6 +99,51 @@ export default function CreatePage() {
                                     }`}
                                 >
                                     <span aria-hidden>{option.icon}</span>
+                                    {option.label}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* Genre, instruments, status */}
+                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                        <div>
+                            <label className={labelClass}>Genre <span className="normal-case font-normal text-[var(--muted)]/70">(optional)</span></label>
+                            <input
+                                className={fieldClass}
+                                placeholder="Jazz, Lo-fi, Metal..."
+                                value={genre}
+                                onChange={(e) => setGenre(e.target.value)}
+                            />
+                        </div>
+                        <div>
+                            <label className={labelClass}>Instruments <span className="normal-case font-normal text-[var(--muted)]/70">(optional)</span></label>
+                            <input
+                                className={fieldClass}
+                                placeholder="Guitar, Piano, Drums"
+                                value={instruments}
+                                onChange={(e) => setInstruments(e.target.value)}
+                            />
+                        </div>
+                    </div>
+
+                    <div>
+                        <p className={labelClass}>Status</p>
+                        <div className="flex flex-wrap gap-2 rounded-xl border border-[var(--border)] bg-[var(--surface)]/60 p-1.5">
+                            {([
+                                { value: "finished" as StatusOption, label: "Finished" },
+                                { value: "wip" as StatusOption, label: "Work in progress" },
+                            ]).map((option) => (
+                                <button
+                                    key={option.value}
+                                    type="button"
+                                    onClick={() => setStatus(option.value)}
+                                    className={`flex flex-1 items-center justify-center gap-1.5 rounded-lg px-4 py-2 text-sm font-medium transition-all duration-200 ${
+                                        status === option.value
+                                            ? "bg-gradient-to-r from-indigo-600 to-violet-600 text-white shadow-md shadow-indigo-600/20"
+                                            : "text-[var(--muted)] hover:text-[var(--foreground)] hover:bg-indigo-500/10"
+                                    }`}
+                                >
                                     {option.label}
                                 </button>
                             ))}
@@ -189,6 +238,11 @@ export default function CreatePage() {
                                     ? convertToEmbedUrl(videoUrl)
                                     : undefined;
 
+                                const parsedInstruments = instruments
+                                    .split(",")
+                                    .map((i) => i.trim())
+                                    .filter(Boolean);
+
                                 const newPost: Record<string, unknown> = {
                                     title,
                                     content: postType === "feedback" ? description : content,
@@ -196,6 +250,9 @@ export default function CreatePage() {
                                     video_url: normalizedVideoUrl,
                                     author_id: user.id,
                                     is_anonymous: postType === "feedback" ? visibility === "anonymous" : false,
+                                    genre: genre.trim() || null,
+                                    instruments: parsedInstruments.length > 0 ? parsedInstruments : null,
+                                    status,
                                 };
 
                                 const { error } = await supabase.from("posts").insert(newPost);
@@ -223,6 +280,9 @@ export default function CreatePage() {
                                 setPostType("video");
                                 setVideoUrl("");
                                 setVisibility("show");
+                                setGenre("");
+                                setInstruments("");
+                                setStatus("finished");
                                 router.push(postType === "feedback" ? "/feedback" : "/");
                             } catch (err) {
                                 console.error("Unexpected error", err);

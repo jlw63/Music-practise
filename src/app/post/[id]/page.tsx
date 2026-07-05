@@ -14,6 +14,9 @@ type Post = {
   video_url?: string;
   created_at: string;
   author_id: string;
+  genre?: string | null;
+  instruments?: string[] | null;
+  status?: "wip" | "finished" | null;
   profiles?: {
     username: string;
   }[];
@@ -38,6 +41,9 @@ export default function PostPage() {
           video_url,
           created_at,
           author_id,
+          genre,
+          instruments,
+          status,
           profiles!posts_author_id_fkey(username)
         `)
         .eq("id", postId)
