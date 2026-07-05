@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { supabase } from "@/lib/supabase";
 import PostCard from "@/app/components/PostCards";
 
@@ -62,13 +62,34 @@ export default function Home() {
     initialLoad();
   }, [fetchPosts]);
 
-  async function loadMore() {
+  const loadMore = useCallback(async () => {
     setLoadingMore(true);
     const data = await fetchPosts(posts.length);
     setPosts((prev) => [...prev, ...data]);
     setHasMore(data.length === PAGE_SIZE);
     setLoadingMore(false);
-  }
+  }, [fetchPosts, posts.length]);
+
+  const sentinelRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    if (loading || !hasMore) return;
+
+    const node = sentinelRef.current;
+    if (!node) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && !loadingMore) {
+          loadMore();
+        }
+      },
+      { rootMargin: "200px" }
+    );
+
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, [loading, hasMore, loadingMore, loadMore]);
 
   return (
     <div className="max-w-3xl mx-auto space-y-6 px-4">
@@ -112,14 +133,10 @@ export default function Home() {
       ))}
 
       {!loading && hasMore && (
-        <div className="flex justify-center pb-6">
-          <button
-            onClick={loadMore}
-            disabled={loadingMore}
-            className="rounded-lg border border-[var(--border)] bg-[var(--surface)] px-6 py-2.5 text-sm font-semibold text-[var(--foreground)] shadow-sm transition-all duration-200 hover:border-indigo-400/60 hover:text-indigo-600 hover:shadow-md active:scale-95 disabled:cursor-not-allowed disabled:opacity-50 dark:hover:text-indigo-400"
-          >
-            {loadingMore ? "Loading..." : "Load more"}
-          </button>
+        <div ref={sentinelRef} className="flex justify-center pb-6">
+          {loadingMore && (
+            <span className="text-sm text-[var(--muted)]">Loading...</span>
+          )}
         </div>
       )}
 
