@@ -121,15 +121,23 @@ export default function SearchPage() {
           value={instrumentFilter}
           onChange={(e) => setInstrumentFilter(e.target.value)}
         />
-        <div className="flex rounded-lg border border-[var(--border)] bg-[var(--surface)] p-1">
+        <div
+          role="group"
+          aria-label="Filter by status"
+          className="flex items-center gap-1.5 rounded-lg border border-[var(--border)] bg-[var(--surface)] p-1"
+        >
+          <span className="pl-1.5 text-[11px] font-semibold uppercase tracking-wider text-[var(--muted)]">
+            Status
+          </span>
           {([
-            { value: "any" as StatusFilter, label: "Any" },
-            { value: "finished" as StatusFilter, label: "Finished" },
-            { value: "wip" as StatusFilter, label: "WIP" },
+            { value: "any" as StatusFilter, label: "Any", title: "All posts" },
+            { value: "finished" as StatusFilter, label: "Finished", title: "Completed tracks" },
+            { value: "wip" as StatusFilter, label: "WIP", title: "Work in progress" },
           ]).map((option) => (
             <button
               key={option.value}
               type="button"
+              title={option.title}
               onClick={() => setStatusFilter(option.value)}
               className={`rounded-md px-3 py-1.5 text-xs font-medium transition-all duration-200 ${
                 statusFilter === option.value

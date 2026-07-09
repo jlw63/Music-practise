@@ -160,6 +160,18 @@ export default function CreatePage() {
                                 value={videoUrl}
                                 onChange={(e) => setVideoUrl(e.target.value)}
                             />
+                            <p className="mt-1.5 text-xs text-[var(--muted)]">
+                                MusicSocial embeds YouTube videos only — upload your video to{" "}
+                                <a
+                                    href="https://www.youtube.com/upload"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="font-medium text-indigo-600 underline decoration-indigo-600/40 underline-offset-2 hover:text-indigo-500 dark:text-indigo-400"
+                                >
+                                    YouTube
+                                </a>{" "}
+                                first, then paste the link here.
+                            </p>
                         </div>
                     )}
 
