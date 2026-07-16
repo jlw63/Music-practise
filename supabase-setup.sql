@@ -148,3 +148,21 @@ drop policy if exists "Users can update own goal" on practice_goals;
 create policy "Users can update own goal"
   on practice_goals for update
   using (auth.uid() = user_id);
+
+-- ---------- 9. Private feedback comments ----------
+-- Comments on feedback posts are private: only the comment's author
+-- (the reviewer) and the post's author (the person asking for feedback)
+-- can read them. Comments on video/discussion posts stay public.
+-- A RESTRICTIVE policy is AND-ed with the existing permissive select
+-- policy, so it works regardless of that policy's name.
+drop policy if exists "Feedback comments are private" on comments;
+create policy "Feedback comments are private"
+  on comments as restrictive for select
+  using (
+    author_id = auth.uid()
+    or exists (
+      select 1 from posts p
+      where p.id = comments.post_id
+        and (p.type <> 'feedback' or p.author_id = auth.uid())
+    )
+  );

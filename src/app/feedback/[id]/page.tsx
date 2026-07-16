@@ -255,6 +255,13 @@ export default function FeedbackDetailPage() {
   const username = post.profiles?.[0]?.username;
   const ratedCount = Object.values(ratings).filter((v) => v !== null).length;
 
+  // feedback comments are private: the post author sees everything,
+  // a reviewer sees only the comments they wrote themselves
+  const isPostAuthor = user?.id === post.author_id;
+  const visibleComments = isPostAuthor
+    ? comments
+    : comments.filter((c) => c.author_id === user?.id);
+
   const scrollTo = (id: string) => {
     document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
@@ -302,9 +309,9 @@ export default function FeedbackDetailPage() {
           onClick={() => scrollTo("comments")}
           className="flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium text-[var(--muted)] transition hover:bg-blue-500/10 hover:text-blue-600 dark:hover:text-blue-400"
         >
-          Comments
+          {isPostAuthor ? "Comments" : "Your comments"}
           <span className="rounded-full bg-[var(--border)]/40 px-1.5 py-0.5 text-[10px] font-semibold text-[var(--muted)]">
-            {comments.length}
+            {visibleComments.length}
           </span>
         </button>
       </div>
@@ -436,6 +443,13 @@ export default function FeedbackDetailPage() {
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <p className="text-xs font-medium text-[var(--muted)]">
                   What did you like? What could be better? What was your favourite moment?
+                  {!isPostAuthor && (
+                    <span className="mt-0.5 block text-[var(--muted)]/80">
+                      🔒 Your feedback is private — only{" "}
+                      {username ? <span className="font-medium">{username}</span> : "the poster"} and
+                      you can see it.
+                    </span>
+                  )}
                 </p>
                 {embedSrc && (
                   <button
@@ -474,14 +488,24 @@ export default function FeedbackDetailPage() {
       {/* Comments */}
       <div id="comments" className={cardClass}>
         <h2 className="text-lg font-bold text-[var(--foreground)]">
-          Comments · {comments.length}
+          {isPostAuthor ? "Comments" : "Your comments"} · {visibleComments.length}
         </h2>
+        {!isPostAuthor && (
+          <p className="mt-1 text-xs text-[var(--muted)]">
+            🔒 Feedback here is private — reviewers only see their own comments, and the poster
+            sees everything.
+          </p>
+        )}
 
         <div className="mt-4 space-y-3">
-          {comments.length === 0 && (
-            <p className="text-sm text-[var(--muted)]">Be the first to riff on this.</p>
+          {visibleComments.length === 0 && (
+            <p className="text-sm text-[var(--muted)]">
+              {isPostAuthor
+                ? "No feedback yet — share your post to get some ears on it."
+                : "You haven't left feedback yet. Be the first to riff on this."}
+            </p>
           )}
-          {comments.map((comment) => (
+          {visibleComments.map((comment) => (
             <div
               key={comment.id}
               className="border-l-2 border-[var(--border)] pl-3 py-1.5 transition-colors hover:border-blue-400/60"
