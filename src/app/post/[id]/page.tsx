@@ -64,7 +64,7 @@ export default function PostPage() {
     <div className="mx-auto max-w-3xl px-4">
       <Link
         href="/"
-        className="mb-4 inline-flex items-center gap-1 text-sm font-medium text-[var(--muted)] transition hover:text-indigo-600 dark:hover:text-indigo-400"
+        className="mb-4 inline-flex items-center gap-1 text-sm font-medium text-[var(--muted)] transition hover:text-blue-600 dark:hover:text-blue-400"
       >
         ← Back to feed
       </Link>

@@ -1,5 +1,5 @@
 -- ============================================================
--- MusicSocial — database setup for new features
+-- Riff — database setup for new features
 -- Run this in your Supabase dashboard: SQL Editor → New query
 -- Safe to run more than once.
 -- ============================================================
@@ -124,3 +124,27 @@ alter table posts
 
 create index if not exists posts_genre_idx on posts (genre);
 create index if not exists posts_status_idx on posts (status);
+
+-- ---------- 8. Practice goals ----------
+create table if not exists practice_goals (
+  user_id uuid primary key references profiles(id) on delete cascade,
+  weekly_minutes_target int not null check (weekly_minutes_target > 0),
+  updated_at timestamptz not null default now()
+);
+
+alter table practice_goals enable row level security;
+
+drop policy if exists "Anyone can view practice goals" on practice_goals;
+create policy "Anyone can view practice goals"
+  on practice_goals for select
+  using (true);
+
+drop policy if exists "Users can set own goal" on practice_goals;
+create policy "Users can set own goal"
+  on practice_goals for insert
+  with check (auth.uid() = user_id);
+
+drop policy if exists "Users can update own goal" on practice_goals;
+create policy "Users can update own goal"
+  on practice_goals for update
+  using (auth.uid() = user_id);

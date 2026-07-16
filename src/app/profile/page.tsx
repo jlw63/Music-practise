@@ -274,7 +274,7 @@ export default function ProfilePage() {
       onClick={() => setShowList(showList === key ? null : key)}
       className={`rounded-lg px-3 py-1.5 text-sm transition-all duration-200 ${
         showList === key
-          ? "bg-indigo-500/10 text-indigo-600 dark:text-indigo-400"
+          ? "bg-blue-500/10 text-blue-600 dark:text-blue-400"
           : "text-[var(--muted)] hover:bg-[var(--border)]/30 hover:text-[var(--foreground)]"
       }`}
     >
@@ -308,7 +308,7 @@ export default function ProfilePage() {
             onClick={() => fileInputRef.current?.click()}
             disabled={uploadingAvatar}
             title="Change avatar"
-            className="group relative h-16 w-16 shrink-0 overflow-hidden rounded-full transition-all hover:ring-2 hover:ring-indigo-500/50 disabled:cursor-wait"
+            className="group relative h-16 w-16 shrink-0 overflow-hidden rounded-full transition-all hover:ring-2 hover:ring-blue-500/50 disabled:cursor-wait"
           >
             {profile?.avatar_url ? (
               // eslint-disable-next-line @next/next/no-img-element
@@ -318,7 +318,7 @@ export default function ProfilePage() {
                 className="h-full w-full object-cover"
               />
             ) : (
-              <span className="flex h-full w-full items-center justify-center bg-gradient-to-br from-indigo-600 to-violet-600 text-2xl font-bold text-white">
+              <span className="flex h-full w-full items-center justify-center bg-blue-600 text-2xl font-bold text-white">
                 {profile?.username?.[0]?.toUpperCase() ?? "?"}
               </span>
             )}
@@ -353,7 +353,7 @@ export default function ProfilePage() {
               setEditBio(profile?.bio || "");
               setEditInstruments((profile?.instruments || []).join(", "));
             }}
-            className="rounded-lg border border-[var(--border)] px-4 py-2 text-sm font-medium text-[var(--muted)] transition-all hover:border-indigo-400/60 hover:text-indigo-600 dark:hover:text-indigo-400"
+            className="rounded-lg border border-[var(--border)] px-4 py-2 text-sm font-medium text-[var(--muted)] transition-all hover:border-blue-400/60 hover:text-blue-600 dark:hover:text-blue-400"
           >
             {editingProfile ? "Cancel" : "✏️ Edit profile"}
           </button>
@@ -370,7 +370,7 @@ export default function ProfilePage() {
                 {profile.instruments.map((inst) => (
                   <span
                     key={inst}
-                    className="rounded-full bg-indigo-500/10 px-3 py-1 text-xs font-medium text-indigo-600 dark:text-indigo-400"
+                    className="rounded-full bg-blue-500/10 px-3 py-1 text-xs font-medium text-blue-600 dark:text-blue-400"
                   >
                     🎵 {inst}
                   </span>
@@ -385,7 +385,7 @@ export default function ProfilePage() {
           <div className="mt-4 border-t border-[var(--border)] pt-4">
             <label className="mb-1.5 block text-sm font-medium text-[var(--foreground)]">Bio</label>
             <textarea
-              className="w-full rounded-lg border border-[var(--border)] bg-[var(--background)]/50 px-3 py-2 text-sm text-[var(--foreground)] outline-none transition-all placeholder:text-[var(--muted)]/70 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/30"
+              className="w-full rounded-lg border border-[var(--border)] bg-[var(--background)]/50 px-3 py-2 text-sm text-[var(--foreground)] outline-none transition-all placeholder:text-[var(--muted)]/70 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30"
               rows={3}
               maxLength={300}
               placeholder="Tell people about yourself and what you're practising..."
@@ -396,7 +396,7 @@ export default function ProfilePage() {
               Instruments <span className="font-normal text-[var(--muted)]">(comma-separated)</span>
             </label>
             <input
-              className="w-full rounded-lg border border-[var(--border)] bg-[var(--background)]/50 px-3 py-2 text-sm text-[var(--foreground)] outline-none transition-all placeholder:text-[var(--muted)]/70 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/30"
+              className="w-full rounded-lg border border-[var(--border)] bg-[var(--background)]/50 px-3 py-2 text-sm text-[var(--foreground)] outline-none transition-all placeholder:text-[var(--muted)]/70 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30"
               placeholder="Guitar, Piano, Drums"
               value={editInstruments}
               onChange={(e) => setEditInstruments(e.target.value)}
@@ -404,7 +404,7 @@ export default function ProfilePage() {
             <button
               onClick={saveProfile}
               disabled={savingProfile}
-              className="mt-3 rounded-lg bg-gradient-to-r from-indigo-600 to-violet-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-all duration-200 hover:shadow-md hover:shadow-indigo-600/20 active:scale-95 disabled:cursor-not-allowed disabled:opacity-40"
+              className="mt-3 rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-all duration-200 hover:shadow-md hover:shadow-blue-600/20 active:scale-95 disabled:cursor-not-allowed disabled:opacity-40"
             >
               {savingProfile ? "Saving..." : "Save profile"}
             </button>
@@ -488,7 +488,7 @@ export default function ProfilePage() {
                       setEditContent(post.content);
                       setDeleteConfirmId(null);
                     }}
-                    className="rounded-md px-2.5 py-1 text-xs font-medium text-[var(--muted)] transition hover:bg-indigo-500/10 hover:text-indigo-600 dark:hover:text-indigo-400"
+                    className="rounded-md px-2.5 py-1 text-xs font-medium text-[var(--muted)] transition hover:bg-blue-500/10 hover:text-blue-600 dark:hover:text-blue-400"
                   >
                     ✏️ Edit
                   </button>
@@ -504,18 +504,18 @@ export default function ProfilePage() {
           )}
 
           {editingPostId === post.id ? (
-            <div className="rounded-2xl border border-indigo-500/40 bg-[var(--surface)] p-5 shadow-sm">
+            <div className="rounded-2xl border border-blue-500/40 bg-[var(--surface)] p-5 shadow-sm">
               <h3 className="mb-3 text-xs font-semibold uppercase tracking-wider text-[var(--muted)]">
                 Editing post
               </h3>
               <input
-                className="w-full rounded-lg border border-[var(--border)] bg-[var(--background)]/50 px-3 py-2 text-sm font-semibold text-[var(--foreground)] outline-none transition-all focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/30"
+                className="w-full rounded-lg border border-[var(--border)] bg-[var(--background)]/50 px-3 py-2 text-sm font-semibold text-[var(--foreground)] outline-none transition-all focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30"
                 value={editTitle}
                 onChange={(e) => setEditTitle(e.target.value)}
                 placeholder="Title"
               />
               <textarea
-                className="mt-2 w-full rounded-lg border border-[var(--border)] bg-[var(--background)]/50 px-3 py-2 text-sm text-[var(--foreground)] outline-none transition-all focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/30"
+                className="mt-2 w-full rounded-lg border border-[var(--border)] bg-[var(--background)]/50 px-3 py-2 text-sm text-[var(--foreground)] outline-none transition-all focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30"
                 rows={4}
                 value={editContent}
                 onChange={(e) => setEditContent(e.target.value)}
@@ -525,7 +525,7 @@ export default function ProfilePage() {
                 <button
                   onClick={() => saveEdit(post.id)}
                   disabled={!editTitle.trim()}
-                  className="rounded-lg bg-gradient-to-r from-indigo-600 to-violet-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-all duration-200 hover:shadow-md hover:shadow-indigo-600/20 active:scale-95 disabled:cursor-not-allowed disabled:opacity-40"
+                  className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-all duration-200 hover:shadow-md hover:shadow-blue-600/20 active:scale-95 disabled:cursor-not-allowed disabled:opacity-40"
                 >
                   Save changes
                 </button>

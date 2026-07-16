@@ -42,7 +42,7 @@ export default function LoginPage() {
                     Welcome back
                 </h1>
                 <p className="mt-1 text-sm text-[var(--muted)]">
-                    Log in to continue to MusicSocial
+                    Log in to continue to riff
                 </p>
 
                 {/* Error banner */}
@@ -64,7 +64,7 @@ export default function LoginPage() {
                             id="email"
                             type="email"
                             autoComplete="email"
-                            className="w-full rounded-lg border border-[var(--border)] bg-[var(--background)]/50 px-3 py-2 text-sm text-[var(--foreground)] outline-none transition-all placeholder:text-[var(--muted)]/70 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/30"
+                            className="w-full rounded-lg border border-[var(--border)] bg-[var(--background)]/50 px-3 py-2 text-sm text-[var(--foreground)] outline-none transition-all placeholder:text-[var(--muted)]/70 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30"
                             placeholder="you@example.com"
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
@@ -79,7 +79,7 @@ export default function LoginPage() {
                             id="password"
                             type="password"
                             autoComplete="current-password"
-                            className="w-full rounded-lg border border-[var(--border)] bg-[var(--background)]/50 px-3 py-2 text-sm text-[var(--foreground)] outline-none transition-all placeholder:text-[var(--muted)]/70 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/30"
+                            className="w-full rounded-lg border border-[var(--border)] bg-[var(--background)]/50 px-3 py-2 text-sm text-[var(--foreground)] outline-none transition-all placeholder:text-[var(--muted)]/70 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30"
                             placeholder="••••••••"
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
@@ -88,7 +88,7 @@ export default function LoginPage() {
                     </div>
 
                     <button
-                        className="mt-2 rounded-lg bg-gradient-to-r from-indigo-600 to-violet-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-all duration-200 hover:shadow-md hover:shadow-indigo-600/20 active:scale-95 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:shadow-sm"
+                        className="mt-2 rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-all duration-200 hover:shadow-md hover:shadow-blue-600/20 active:scale-95 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:shadow-sm"
                         onClick={handleLogin}
                         disabled={loading}
                     >
@@ -100,7 +100,7 @@ export default function LoginPage() {
                     Don&apos;t have an account?{" "}
                     <Link
                         href="/signup"
-                        className="font-semibold text-indigo-600 transition hover:text-indigo-500 dark:text-indigo-400 dark:hover:text-indigo-300"
+                        className="font-semibold text-blue-600 transition hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300"
                     >
                         Sign up
                     </Link>

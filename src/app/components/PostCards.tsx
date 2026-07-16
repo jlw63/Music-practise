@@ -263,7 +263,7 @@ export default function PostCard({ post }: Props) {
       <div className="flex items-center justify-between">
         <Link
           href={`/profile/${post.author_id}`}
-          className="text-base font-semibold text-[var(--foreground)] transition-colors hover:text-indigo-600 dark:hover:text-indigo-400"
+          className="text-base font-semibold text-[var(--foreground)] transition-colors hover:text-blue-600 dark:hover:text-blue-400"
         >
           {authorUsername ?? "Unknown"}
         </Link>
@@ -289,14 +289,14 @@ export default function PostCard({ post }: Props) {
             </span>
           )}
           {post.genre && (
-            <span className="rounded-full bg-violet-500/10 px-3 py-1 text-xs font-medium text-violet-600 dark:text-violet-400">
+            <span className="rounded-full bg-blue-500/10 px-3 py-1 text-xs font-medium text-blue-600 dark:text-blue-400">
               {post.genre}
             </span>
           )}
           {post.instruments?.map((inst) => (
             <span
               key={inst}
-              className="rounded-full bg-indigo-500/10 px-3 py-1 text-xs font-medium text-indigo-600 dark:text-indigo-400"
+              className="rounded-full bg-blue-500/10 px-3 py-1 text-xs font-medium text-blue-600 dark:text-blue-400"
             >
               {inst}
             </span>
@@ -333,7 +333,7 @@ export default function PostCard({ post }: Props) {
         {comments.map((comment) => (
           <div
             key={comment.id}
-            className="border-l-2 border-[var(--border)] pl-3 py-1.5 transition-colors hover:border-indigo-400/60"
+            className="border-l-2 border-[var(--border)] pl-3 py-1.5 transition-colors hover:border-blue-400/60"
           >
             <p className="text-sm font-medium text-[var(--foreground)]">
               {comment.profiles?.[0]?.username ?? "Unknown"}
@@ -342,14 +342,14 @@ export default function PostCard({ post }: Props) {
             {editingCommentId === comment.id ? (
               <div className="mt-1.5">
                 <input
-                  className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-sm text-[var(--foreground)] outline-none transition-all focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/30"
+                  className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-sm text-[var(--foreground)] outline-none transition-all focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30"
                   value={editComment}
                   onChange={(e) => setEditComment(e.target.value)}
                 />
                 <div className="mt-2 flex gap-2">
                   <button
                     onClick={() => saveComment(comment.id)}
-                    className="rounded-md bg-indigo-600 px-3 py-1 text-xs font-semibold text-white transition hover:bg-indigo-500"
+                    className="rounded-md bg-blue-600 px-3 py-1 text-xs font-semibold text-white transition hover:bg-blue-500"
                   >
                     Save
                   </button>
@@ -372,7 +372,7 @@ export default function PostCard({ post }: Props) {
                         setEditingCommentId(comment.id);
                         setEditComment(comment.content);
                       }}
-                      className="text-xs font-medium text-[var(--muted)] transition hover:text-indigo-600 dark:hover:text-indigo-400"
+                      className="text-xs font-medium text-[var(--muted)] transition hover:text-blue-600 dark:hover:text-blue-400"
                     >
                       Edit
                     </button>
@@ -393,7 +393,7 @@ export default function PostCard({ post }: Props) {
       {/* New comment */}
       <div className="mt-4 flex gap-2">
         <input
-          className="flex-1 rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-sm text-[var(--foreground)] outline-none transition-all placeholder:text-[var(--muted)]/70 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/30"
+          className="flex-1 rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-sm text-[var(--foreground)] outline-none transition-all placeholder:text-[var(--muted)]/70 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30"
           value={newComment}
           onChange={(e) => setNewComment(e.target.value)}
           placeholder="Join discussion..."
@@ -404,7 +404,7 @@ export default function PostCard({ post }: Props) {
         <button
           onClick={handleComment}
           disabled={!newComment.trim()}
-          className="rounded-lg bg-gradient-to-r from-indigo-600 to-violet-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-all duration-200 hover:shadow-md hover:shadow-indigo-600/20 active:scale-95 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:shadow-sm"
+          className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-all duration-200 hover:shadow-md hover:shadow-blue-600/20 active:scale-95 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:shadow-sm"
         >
           Send
         </button>

@@ -50,7 +50,7 @@ export default function CreatePage() {
     }
 
     const fieldClass =
-        "w-full rounded-xl border border-[var(--border)] bg-[var(--surface)]/95 px-4 py-3 text-[var(--foreground)] placeholder:text-[var(--muted)]/70 outline-none transition-all duration-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/30";
+        "w-full rounded-xl border border-[var(--border)] bg-[var(--surface)]/95 px-4 py-3 text-[var(--foreground)] placeholder:text-[var(--muted)]/70 outline-none transition-all duration-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30";
 
     const labelClass = "mb-1.5 block text-xs font-semibold uppercase tracking-wider text-[var(--muted)]";
 
@@ -60,13 +60,13 @@ export default function CreatePage() {
 
                 {/* Header */}
                 <div className="mb-8 flex items-start gap-3">
-                    <span className="mt-1.5 h-2.5 w-2.5 flex-shrink-0 rounded-full bg-gradient-to-br from-indigo-500 to-violet-500" />
+                    <span className="mt-1.5 h-2.5 w-2.5 flex-shrink-0 rounded-full bg-blue-500" />
                     <div>
-                        <h1 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-indigo-600 to-violet-500 dark:from-indigo-400 dark:to-violet-300 bg-clip-text text-transparent">
+                        <h1 className="text-3xl font-bold tracking-tight text-blue-600 dark:text-blue-400">
                             Create Post
                         </h1>
                         <p className="mt-1.5 text-sm text-[var(--muted)]">
-                            Share a video, discussion, or feedback post on MusicSocial.
+                            Share a video, discussion, or feedback post on riff.
                         </p>
                     </div>
                 </div>
@@ -94,8 +94,8 @@ export default function CreatePage() {
                                     onClick={() => setPostType(option.value)}
                                     className={`flex flex-1 items-center justify-center gap-1.5 rounded-lg px-4 py-2 text-sm font-medium transition-all duration-200 ${
                                         postType === option.value
-                                            ? "bg-gradient-to-r from-indigo-600 to-violet-600 text-white shadow-md shadow-indigo-600/20"
-                                            : "text-[var(--muted)] hover:text-[var(--foreground)] hover:bg-indigo-500/10"
+                                            ? "bg-blue-600 text-white shadow-md shadow-blue-600/20"
+                                            : "text-[var(--muted)] hover:text-[var(--foreground)] hover:bg-blue-500/10"
                                     }`}
                                 >
                                     <span aria-hidden>{option.icon}</span>
@@ -140,8 +140,8 @@ export default function CreatePage() {
                                     onClick={() => setStatus(option.value)}
                                     className={`flex flex-1 items-center justify-center gap-1.5 rounded-lg px-4 py-2 text-sm font-medium transition-all duration-200 ${
                                         status === option.value
-                                            ? "bg-gradient-to-r from-indigo-600 to-violet-600 text-white shadow-md shadow-indigo-600/20"
-                                            : "text-[var(--muted)] hover:text-[var(--foreground)] hover:bg-indigo-500/10"
+                                            ? "bg-blue-600 text-white shadow-md shadow-blue-600/20"
+                                            : "text-[var(--muted)] hover:text-[var(--foreground)] hover:bg-blue-500/10"
                                     }`}
                                 >
                                     {option.label}
@@ -161,12 +161,12 @@ export default function CreatePage() {
                                 onChange={(e) => setVideoUrl(e.target.value)}
                             />
                             <p className="mt-1.5 text-xs text-[var(--muted)]">
-                                MusicSocial embeds YouTube videos only — upload your video to{" "}
+                                riff embeds YouTube videos only — upload your video to{" "}
                                 <a
                                     href="https://www.youtube.com/upload"
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="font-medium text-indigo-600 underline decoration-indigo-600/40 underline-offset-2 hover:text-indigo-500 dark:text-indigo-400"
+                                    className="font-medium text-blue-600 underline decoration-blue-600/40 underline-offset-2 hover:text-blue-500 dark:text-blue-400"
                                 >
                                     YouTube
                                 </a>{" "}
@@ -191,8 +191,8 @@ export default function CreatePage() {
                                             onClick={() => setVisibility(option.value)}
                                             className={`rounded-lg px-4 py-2 text-xs font-medium transition-all duration-200 ${
                                                 visibility === option.value
-                                                    ? "bg-indigo-600 text-white shadow-sm"
-                                                    : "text-[var(--muted)] bg-[var(--border)]/20 hover:text-[var(--foreground)] hover:bg-indigo-500/10"
+                                                    ? "bg-blue-600 text-white shadow-sm"
+                                                    : "text-[var(--muted)] bg-[var(--border)]/20 hover:text-[var(--foreground)] hover:bg-blue-500/10"
                                             }`}
                                         >
                                             {option.label}
@@ -228,7 +228,7 @@ export default function CreatePage() {
 
                     {/* Submit */}
                     <button
-                        className="w-full rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 px-6 py-3.5 text-sm font-semibold text-white shadow-lg shadow-indigo-600/20 transition-all duration-200 hover:shadow-xl hover:shadow-indigo-600/30 hover:-translate-y-[1px] active:scale-[0.99] active:translate-y-0"
+                        className="w-full rounded-xl bg-blue-600 px-6 py-3.5 text-sm font-semibold text-white shadow-lg shadow-blue-600/20 transition-all duration-200 hover:shadow-xl hover:shadow-blue-600/30 hover:-translate-y-[1px] active:scale-[0.99] active:translate-y-0"
                         onClick={async () => {
                             if (!title.trim()) {
                                 alert("Please add a title.");

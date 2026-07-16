@@ -19,7 +19,7 @@ type Notification = {
 };
 
 const TYPE_META: Record<string, { icon: string; label: string; accent: string }> = {
-  follow: { icon: "👤", label: "followed you", accent: "bg-indigo-500/10 text-indigo-500" },
+  follow: { icon: "👤", label: "followed you", accent: "bg-blue-500/10 text-blue-500" },
   like: { icon: "♥", label: "liked your post", accent: "bg-red-500/10 text-red-500" },
   comment: { icon: "💬", label: "commented on your post", accent: "bg-emerald-500/10 text-emerald-500" },
 };
@@ -131,7 +131,7 @@ export default function NotificationsPage() {
               className={`flex items-center gap-3 rounded-2xl border p-4 shadow-sm transition-shadow duration-200 hover:shadow-md ${
                 notification.read
                   ? "border-[var(--border)] bg-[var(--surface)]"
-                  : "border-indigo-400/40 bg-indigo-500/5"
+                  : "border-blue-400/40 bg-blue-500/5"
               }`}
             >
               <span
@@ -144,7 +144,7 @@ export default function NotificationsPage() {
                 <p className="text-sm text-[var(--foreground)]">
                   <Link
                     href={`/profile/${notification.sender_id}`}
-                    className="font-semibold transition-colors hover:text-indigo-600 dark:hover:text-indigo-400"
+                    className="font-semibold transition-colors hover:text-blue-600 dark:hover:text-blue-400"
                   >
                     {notification.sender.username}
                   </Link>{" "}
@@ -158,14 +158,14 @@ export default function NotificationsPage() {
               {notification.post_id && (
                 <Link
                   href={`/post/${notification.post_id}`}
-                  className="shrink-0 rounded-lg border border-[var(--border)] px-3 py-1.5 text-xs font-medium text-[var(--muted)] transition-all hover:border-indigo-400/60 hover:text-indigo-600 dark:hover:text-indigo-400"
+                  className="shrink-0 rounded-lg border border-[var(--border)] px-3 py-1.5 text-xs font-medium text-[var(--muted)] transition-all hover:border-blue-400/60 hover:text-blue-600 dark:hover:text-blue-400"
                 >
                   View post →
                 </Link>
               )}
 
               {!notification.read && (
-                <span className="h-2 w-2 shrink-0 rounded-full bg-indigo-500" aria-label="Unread" />
+                <span className="h-2 w-2 shrink-0 rounded-full bg-blue-500" aria-label="Unread" />
               )}
             </div>
           );

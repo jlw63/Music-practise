@@ -210,7 +210,7 @@ export default function UserProfilePage() {
       onClick={() => setShowList(showList === key ? null : key)}
       className={`rounded-lg px-3 py-1.5 text-sm transition-all duration-200 ${
         showList === key
-          ? "bg-indigo-500/10 text-indigo-600 dark:text-indigo-400"
+          ? "bg-blue-500/10 text-blue-600 dark:text-blue-400"
           : "text-[var(--muted)] hover:bg-[var(--border)]/30 hover:text-[var(--foreground)]"
       }`}
     >
@@ -258,7 +258,7 @@ export default function UserProfilePage() {
               // eslint-disable-next-line @next/next/no-img-element
               <img src={profile.avatar_url} alt="Avatar" className="h-full w-full object-cover" />
             ) : (
-              <span className="flex h-full w-full items-center justify-center bg-gradient-to-br from-indigo-600 to-violet-600 text-2xl font-bold text-white">
+              <span className="flex h-full w-full items-center justify-center bg-blue-600 text-2xl font-bold text-white">
                 {profile.username?.[0]?.toUpperCase() ?? "?"}
               </span>
             )}
@@ -282,7 +282,7 @@ export default function UserProfilePage() {
               className={`rounded-lg px-5 py-2 text-sm font-semibold transition-all duration-200 active:scale-95 ${
                 following
                   ? "border border-[var(--border)] text-[var(--muted)] hover:border-red-500/50 hover:bg-red-500/5 hover:text-red-500"
-                  : "bg-gradient-to-r from-indigo-600 to-violet-600 text-white shadow-sm hover:shadow-md hover:shadow-indigo-600/20"
+                  : "bg-blue-600 text-white shadow-sm hover:shadow-md hover:shadow-blue-600/20"
               }`}
             >
               {following ? "Following" : "Follow"}
@@ -301,7 +301,7 @@ export default function UserProfilePage() {
                 {profile.instruments.map((inst) => (
                   <span
                     key={inst}
-                    className="rounded-full bg-indigo-500/10 px-3 py-1 text-xs font-medium text-indigo-600 dark:text-indigo-400"
+                    className="rounded-full bg-blue-500/10 px-3 py-1 text-xs font-medium text-blue-600 dark:text-blue-400"
                   >
                     🎵 {inst}
                   </span>

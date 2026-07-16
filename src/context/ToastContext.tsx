@@ -19,7 +19,7 @@ const ToastContext = createContext<ToastContextType | undefined>(undefined);
 const TYPE_STYLES: Record<ToastType, string> = {
   success: "border-emerald-500/40 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400",
   error: "border-red-500/40 bg-red-500/10 text-red-600 dark:text-red-400",
-  info: "border-indigo-500/40 bg-indigo-500/10 text-indigo-600 dark:text-indigo-400",
+  info: "border-blue-500/40 bg-blue-500/10 text-blue-600 dark:text-blue-400",
 };
 
 const TYPE_ICONS: Record<ToastType, string> = {

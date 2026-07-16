@@ -67,7 +67,7 @@ export default function FeedbackFeedPage() {
         </div>
         <Link
           href="/create"
-          className="rounded bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700"
+          className="rounded bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
         >
           New feedback
         </Link>
@@ -89,7 +89,7 @@ export default function FeedbackFeedPage() {
             <Link
               key={post.id}
               href={`/feedback/${post.id}`}
-              className="block rounded-lg border p-4 transition hover:border-indigo-500 hover:shadow-sm"
+              className="block rounded-lg border p-4 transition hover:border-blue-500 hover:shadow-sm"
             >
               <div className="flex items-center justify-between gap-3">
                 <div>
@@ -103,14 +103,14 @@ export default function FeedbackFeedPage() {
                         </span>
                       )}
                       {post.genre && (
-                        <span className="rounded-full bg-violet-500/10 px-3 py-1 text-xs font-medium text-violet-600 dark:text-violet-400">
+                        <span className="rounded-full bg-blue-500/10 px-3 py-1 text-xs font-medium text-blue-600 dark:text-blue-400">
                           {post.genre}
                         </span>
                       )}
                       {post.instruments?.map((inst) => (
                         <span
                           key={inst}
-                          className="rounded-full bg-indigo-500/10 px-3 py-1 text-xs font-medium text-indigo-600 dark:text-indigo-400"
+                          className="rounded-full bg-blue-500/10 px-3 py-1 text-xs font-medium text-blue-600 dark:text-blue-400"
                         >
                           {inst}
                         </span>

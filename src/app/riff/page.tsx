@@ -1,12 +1,12 @@
 import Link from "next/link";
 
-export default function MusicSocialPage() {
+export default function RiffPage() {
   return (
     <div className="max-w-3xl mx-auto space-y-6">
       <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-8 shadow-sm">
-        <h1 className="text-3xl font-bold text-foreground">Welcome to MusicSocial</h1>
+        <h1 className="text-3xl font-bold text-foreground">Welcome to riff</h1>
         <p className="mt-4 text-muted">
-          MusicSocial is a community for musicians to share performances, get feedback, and connect with other players.
+          riff is a community for musicians to share performances, get feedback, and connect with other players.
         </p>
 
         <div className="mt-6 space-y-4 text-foreground">
@@ -33,7 +33,7 @@ export default function MusicSocialPage() {
         </div>
 
         <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
-          <Link href="/" className="inline-flex items-center justify-center rounded-full bg-indigo-600 px-5 py-3 text-sm font-semibold text-white hover:bg-indigo-700 transition">
+          <Link href="/" className="inline-flex items-center justify-center rounded-full bg-blue-600 px-5 py-3 text-sm font-semibold text-white hover:bg-blue-700 transition">
             View latest posts
           </Link>
           <Link href="/create" className="inline-flex items-center justify-center rounded-full border border-[var(--border)] px-5 py-3 text-sm font-semibold text-foreground hover:bg-[var(--foreground)]/10 transition">

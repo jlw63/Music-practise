@@ -49,6 +49,11 @@ export default function PracticeLog({ userId, editable }: Props) {
   const [notes, setNotes] = useState("");
   const [saving, setSaving] = useState(false);
 
+  const [goal, setGoal] = useState<number | null>(null);
+  const [editingGoal, setEditingGoal] = useState(false);
+  const [goalInput, setGoalInput] = useState("");
+  const [savingGoal, setSavingGoal] = useState(false);
+
   useEffect(() => {
     async function fetchSessions() {
       const { data, error } = await supabase
@@ -70,8 +75,44 @@ export default function PracticeLog({ userId, editable }: Props) {
       setLoading(false);
     }
 
+    async function fetchGoal() {
+      const { data } = await supabase
+        .from("practice_goals")
+        .select("weekly_minutes_target")
+        .eq("user_id", userId)
+        .maybeSingle();
+
+      setGoal(data?.weekly_minutes_target ?? null);
+    }
+
     fetchSessions();
+    fetchGoal();
   }, [userId]);
+
+  async function saveGoal() {
+    const mins = parseInt(goalInput, 10);
+    if (!mins || mins <= 0) {
+      toast("Enter a weekly minutes target.", "info");
+      return;
+    }
+
+    setSavingGoal(true);
+
+    const { error } = await supabase
+      .from("practice_goals")
+      .upsert({ user_id: userId, weekly_minutes_target: mins, updated_at: new Date().toISOString() });
+
+    setSavingGoal(false);
+
+    if (error) {
+      toast("Could not save goal: " + error.message, "error");
+      return;
+    }
+
+    setGoal(mins);
+    setEditingGoal(false);
+    toast("Weekly goal saved!", "success");
+  }
 
   async function logSession() {
     if (!instrument.trim()) {
@@ -167,6 +208,32 @@ export default function PracticeLog({ userId, editable }: Props) {
 
   const recent = sessions.slice(0, 5);
 
+  // calendar heatmap for the current month, padded to full weeks (Sun-Sat)
+  const today = new Date();
+  const monthStart = new Date(today.getFullYear(), today.getMonth(), 1);
+  const monthEnd = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+  const gridStart = new Date(monthStart);
+  gridStart.setDate(gridStart.getDate() - gridStart.getDay());
+  const gridEnd = new Date(monthEnd);
+  gridEnd.setDate(gridEnd.getDate() + (6 - gridEnd.getDay()));
+
+  const monthDays: { date: Date; minutes: number; inMonth: boolean }[] = [];
+  for (let d = new Date(gridStart); d <= gridEnd; d.setDate(d.getDate() + 1)) {
+    const key = localDateKey(d);
+    const mins = sessions
+      .filter((s) => s.practised_at === key)
+      .reduce((sum, s) => sum + s.duration_minutes, 0);
+    monthDays.push({ date: new Date(d), minutes: mins, inMonth: d.getMonth() === today.getMonth() });
+  }
+
+  function heatColor(mins: number) {
+    if (mins <= 0) return "bg-[var(--border)]/40";
+    if (mins < 15) return "bg-blue-500/20";
+    if (mins < 30) return "bg-blue-500/40";
+    if (mins < 60) return "bg-blue-500/60";
+    return "bg-blue-500/80";
+  }
+
   return (
     <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-5 shadow-sm">
       <div className="flex flex-wrap items-center justify-between gap-2">
@@ -177,11 +244,70 @@ export default function PracticeLog({ userId, editable }: Props) {
           <span className="rounded-full bg-orange-500/10 px-3 py-1 text-sm font-semibold text-orange-500">
             🔥 {streak} day{streak === 1 ? "" : "s"} streak
           </span>
-          <span className="rounded-full bg-indigo-500/10 px-3 py-1 text-sm font-semibold text-indigo-600 dark:text-indigo-400">
-            {weekTotal} min this week
-          </span>
+          {goal === null ? (
+            <span className="rounded-full bg-blue-500/10 px-3 py-1 text-sm font-semibold text-blue-600 dark:text-blue-400">
+              {weekTotal} min this week
+            </span>
+          ) : (
+            <span className="rounded-full bg-blue-500/10 px-3 py-1 text-sm font-semibold text-blue-600 dark:text-blue-400">
+              {weekTotal} / {goal} min this week
+            </span>
+          )}
+          {editable && !editingGoal && (
+            <button
+              onClick={() => {
+                setEditingGoal(true);
+                setGoalInput(goal ? String(goal) : "");
+              }}
+              className="rounded-full border border-[var(--border)] px-3 py-1 text-xs font-medium text-[var(--muted)] transition hover:border-blue-400/60 hover:text-blue-600 dark:hover:text-blue-400"
+            >
+              {goal === null ? "🎯 Set goal" : "✏️ Edit goal"}
+            </button>
+          )}
         </div>
       </div>
+
+      {/* Goal progress bar */}
+      {goal !== null && (
+        <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-[var(--border)]/40">
+          <div
+            className={`h-full rounded-full transition-all duration-300 ${
+              weekTotal >= goal
+                ? "bg-emerald-500"
+                : "bg-blue-600"
+            }`}
+            style={{ width: `${Math.min((weekTotal / goal) * 100, 100)}%` }}
+          />
+        </div>
+      )}
+
+      {/* Goal edit form */}
+      {editable && editingGoal && (
+        <div className="mt-3 flex flex-wrap items-center gap-2">
+          <input
+            className="w-28 rounded-lg border border-[var(--border)] bg-[var(--background)]/50 px-3 py-2 text-sm text-[var(--foreground)] outline-none transition-all placeholder:text-[var(--muted)]/70 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30"
+            placeholder="Mins/week"
+            type="number"
+            min={1}
+            value={goalInput}
+            onChange={(e) => setGoalInput(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && saveGoal()}
+          />
+          <button
+            onClick={saveGoal}
+            disabled={savingGoal}
+            className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-all duration-200 hover:shadow-md hover:shadow-blue-600/20 active:scale-95 disabled:cursor-not-allowed disabled:opacity-40"
+          >
+            {savingGoal ? "Saving..." : "Save goal"}
+          </button>
+          <button
+            onClick={() => setEditingGoal(false)}
+            className="rounded-lg border border-[var(--border)] px-4 py-2 text-sm font-medium text-[var(--muted)] transition hover:text-[var(--foreground)]"
+          >
+            Cancel
+          </button>
+        </div>
+      )}
 
       {/* Weekly chart */}
       <div className="mt-4 flex h-24 items-end gap-2">
@@ -191,7 +317,7 @@ export default function PracticeLog({ userId, editable }: Props) {
               <div
                 className={`w-full rounded-t-md transition-all duration-300 ${
                   day.minutes > 0
-                    ? "bg-gradient-to-t from-indigo-600 to-violet-500"
+                    ? "bg-blue-600"
                     : "bg-[var(--border)]/40"
                 }`}
                 style={{
@@ -202,7 +328,7 @@ export default function PracticeLog({ userId, editable }: Props) {
             </div>
             <span
               className={`text-[10px] font-medium ${
-                day.isToday ? "text-indigo-600 dark:text-indigo-400" : "text-[var(--muted)]"
+                day.isToday ? "text-blue-600 dark:text-blue-400" : "text-[var(--muted)]"
               }`}
             >
               {day.label}
@@ -211,18 +337,41 @@ export default function PracticeLog({ userId, editable }: Props) {
         ))}
       </div>
 
+      {/* Monthly heatmap */}
+      <div className="mt-5 border-t border-[var(--border)] pt-4">
+        <h3 className="mb-2 text-xs font-semibold uppercase tracking-wider text-[var(--muted)]">
+          {today.toLocaleDateString(undefined, { month: "long", year: "numeric" })}
+        </h3>
+        <div className="grid grid-cols-7 gap-1">
+          {["S", "M", "T", "W", "T", "F", "S"].map((d, i) => (
+            <span key={i} className="text-center text-[10px] font-medium text-[var(--muted)]">
+              {d}
+            </span>
+          ))}
+          {monthDays.map((day, i) => (
+            <div
+              key={i}
+              title={`${day.date.toLocaleDateString(undefined, { month: "short", day: "numeric" })}: ${day.minutes} min`}
+              className={`aspect-square rounded-md ${heatColor(day.minutes)} ${
+                day.inMonth ? "" : "opacity-30"
+              }`}
+            />
+          ))}
+        </div>
+      </div>
+
       {/* Log form */}
       {editable && (
         <div className="mt-5 border-t border-[var(--border)] pt-4">
           <div className="flex flex-wrap gap-2">
             <input
-              className="min-w-0 flex-1 rounded-lg border border-[var(--border)] bg-[var(--background)]/50 px-3 py-2 text-sm text-[var(--foreground)] outline-none transition-all placeholder:text-[var(--muted)]/70 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/30"
+              className="min-w-0 flex-1 rounded-lg border border-[var(--border)] bg-[var(--background)]/50 px-3 py-2 text-sm text-[var(--foreground)] outline-none transition-all placeholder:text-[var(--muted)]/70 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30"
               placeholder="Instrument (e.g. Guitar)"
               value={instrument}
               onChange={(e) => setInstrument(e.target.value)}
             />
             <input
-              className="w-24 rounded-lg border border-[var(--border)] bg-[var(--background)]/50 px-3 py-2 text-sm text-[var(--foreground)] outline-none transition-all placeholder:text-[var(--muted)]/70 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/30"
+              className="w-24 rounded-lg border border-[var(--border)] bg-[var(--background)]/50 px-3 py-2 text-sm text-[var(--foreground)] outline-none transition-all placeholder:text-[var(--muted)]/70 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30"
               placeholder="Mins"
               type="number"
               min={1}
@@ -231,7 +380,7 @@ export default function PracticeLog({ userId, editable }: Props) {
             />
           </div>
           <input
-            className="mt-2 w-full rounded-lg border border-[var(--border)] bg-[var(--background)]/50 px-3 py-2 text-sm text-[var(--foreground)] outline-none transition-all placeholder:text-[var(--muted)]/70 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/30"
+            className="mt-2 w-full rounded-lg border border-[var(--border)] bg-[var(--background)]/50 px-3 py-2 text-sm text-[var(--foreground)] outline-none transition-all placeholder:text-[var(--muted)]/70 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30"
             placeholder="Notes — what did you work on? (optional)"
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
@@ -240,7 +389,7 @@ export default function PracticeLog({ userId, editable }: Props) {
           <button
             onClick={logSession}
             disabled={saving}
-            className="mt-2 rounded-lg bg-gradient-to-r from-indigo-600 to-violet-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-all duration-200 hover:shadow-md hover:shadow-indigo-600/20 active:scale-95 disabled:cursor-not-allowed disabled:opacity-40"
+            className="mt-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-all duration-200 hover:shadow-md hover:shadow-blue-600/20 active:scale-95 disabled:cursor-not-allowed disabled:opacity-40"
           >
             {saving ? "Logging..." : "Log session"}
           </button>

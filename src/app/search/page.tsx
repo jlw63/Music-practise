@@ -101,7 +101,7 @@ export default function SearchPage() {
         </span>
         <input
           autoFocus
-          className="w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] py-3 pl-11 pr-4 text-sm text-[var(--foreground)] shadow-sm outline-none transition-all placeholder:text-[var(--muted)]/70 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/30"
+          className="w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] py-3 pl-11 pr-4 text-sm text-[var(--foreground)] shadow-sm outline-none transition-all placeholder:text-[var(--muted)]/70 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30"
           placeholder="Search users and posts..."
           value={query}
           onChange={(e) => setQuery(e.target.value)}
@@ -110,13 +110,13 @@ export default function SearchPage() {
 
       <div className="mt-4 flex flex-wrap items-center gap-2">
         <input
-          className="w-40 rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-sm text-[var(--foreground)] outline-none transition-all placeholder:text-[var(--muted)]/70 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/30"
+          className="w-40 rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-sm text-[var(--foreground)] outline-none transition-all placeholder:text-[var(--muted)]/70 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30"
           placeholder="Genre"
           value={genreFilter}
           onChange={(e) => setGenreFilter(e.target.value)}
         />
         <input
-          className="w-40 rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-sm text-[var(--foreground)] outline-none transition-all placeholder:text-[var(--muted)]/70 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/30"
+          className="w-40 rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-sm text-[var(--foreground)] outline-none transition-all placeholder:text-[var(--muted)]/70 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30"
           placeholder="Instrument"
           value={instrumentFilter}
           onChange={(e) => setInstrumentFilter(e.target.value)}
@@ -141,8 +141,8 @@ export default function SearchPage() {
               onClick={() => setStatusFilter(option.value)}
               className={`rounded-md px-3 py-1.5 text-xs font-medium transition-all duration-200 ${
                 statusFilter === option.value
-                  ? "bg-indigo-600 text-white shadow-sm"
-                  : "text-[var(--muted)] hover:text-[var(--foreground)] hover:bg-indigo-500/10"
+                  ? "bg-blue-600 text-white shadow-sm"
+                  : "text-[var(--muted)] hover:text-[var(--foreground)] hover:bg-blue-500/10"
               }`}
             >
               {option.label}
@@ -193,7 +193,7 @@ export default function SearchPage() {
           <div className="space-y-2">
             {posts.map((post) => (
               <Link key={post.id} href={`/post/${post.id}`} className="block">
-                <div className="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-4 transition-all duration-200 hover:border-indigo-400/60 hover:bg-indigo-500/5">
+                <div className="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-4 transition-all duration-200 hover:border-blue-400/60 hover:bg-blue-500/5">
                   <div className="flex items-center justify-between gap-3">
                     <h3 className="truncate font-semibold text-[var(--foreground)]">
                       {post.title}
@@ -211,14 +211,14 @@ export default function SearchPage() {
                         </span>
                       )}
                       {post.genre && (
-                        <span className="rounded-full bg-violet-500/10 px-2.5 py-0.5 text-[11px] font-medium text-violet-600 dark:text-violet-400">
+                        <span className="rounded-full bg-blue-500/10 px-2.5 py-0.5 text-[11px] font-medium text-blue-600 dark:text-blue-400">
                           {post.genre}
                         </span>
                       )}
                       {post.instruments?.map((inst) => (
                         <span
                           key={inst}
-                          className="rounded-full bg-indigo-500/10 px-2.5 py-0.5 text-[11px] font-medium text-indigo-600 dark:text-indigo-400"
+                          className="rounded-full bg-blue-500/10 px-2.5 py-0.5 text-[11px] font-medium text-blue-600 dark:text-blue-400"
                         >
                           {inst}
                         </span>

@@ -228,7 +228,7 @@ export default function FeedbackDetailPage() {
     <div className="mx-auto max-w-3xl space-y-6 pb-16">
       <Link
         href="/feedback"
-        className="inline-flex items-center gap-1 text-sm font-medium text-indigo-600 transition hover:gap-1.5 dark:text-indigo-400"
+        className="inline-flex items-center gap-1 text-sm font-medium text-blue-600 transition hover:gap-1.5 dark:text-blue-400"
       >
         ← Back to feedback feed
       </Link>
@@ -237,20 +237,20 @@ export default function FeedbackDetailPage() {
       <div className="sticky top-16 z-10 flex flex-wrap items-center gap-2 rounded-full border border-[var(--border)] bg-[var(--surface)]/90 backdrop-blur-md px-2 py-1.5 shadow-sm">
         <button
           onClick={() => scrollTo("overview")}
-          className="rounded-full px-3 py-1.5 text-xs font-medium text-[var(--muted)] transition hover:bg-indigo-500/10 hover:text-indigo-600 dark:hover:text-indigo-400"
+          className="rounded-full px-3 py-1.5 text-xs font-medium text-[var(--muted)] transition hover:bg-blue-500/10 hover:text-blue-600 dark:hover:text-blue-400"
         >
           Overview
         </button>
         <button
           onClick={() => scrollTo("ratings")}
-          className="flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium text-[var(--muted)] transition hover:bg-indigo-500/10 hover:text-indigo-600 dark:hover:text-indigo-400"
+          className="flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium text-[var(--muted)] transition hover:bg-blue-500/10 hover:text-blue-600 dark:hover:text-blue-400"
         >
           Ratings
           <span
             className={`rounded-full px-1.5 py-0.5 text-[10px] font-semibold ${
               allRated
                 ? "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400"
-                : "bg-indigo-500/15 text-indigo-600 dark:text-indigo-400"
+                : "bg-blue-500/15 text-blue-600 dark:text-blue-400"
             }`}
           >
             {ratedCount}/{RATING_CATEGORIES.length}
@@ -258,7 +258,7 @@ export default function FeedbackDetailPage() {
         </button>
         <button
           onClick={() => scrollTo("comments")}
-          className="flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium text-[var(--muted)] transition hover:bg-indigo-500/10 hover:text-indigo-600 dark:hover:text-indigo-400"
+          className="flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium text-[var(--muted)] transition hover:bg-blue-500/10 hover:text-blue-600 dark:hover:text-blue-400"
         >
           Comments
           <span className="rounded-full bg-[var(--border)]/40 px-1.5 py-0.5 text-[10px] font-semibold text-[var(--muted)]">
@@ -289,14 +289,14 @@ export default function FeedbackDetailPage() {
               </span>
             )}
             {post.genre && (
-              <span className="rounded-full bg-violet-500/10 px-3 py-1 text-xs font-medium text-violet-600 dark:text-violet-400">
+              <span className="rounded-full bg-blue-500/10 px-3 py-1 text-xs font-medium text-blue-600 dark:text-blue-400">
                 {post.genre}
               </span>
             )}
             {post.instruments?.map((inst) => (
               <span
                 key={inst}
-                className="rounded-full bg-indigo-500/10 px-3 py-1 text-xs font-medium text-indigo-600 dark:text-indigo-400"
+                className="rounded-full bg-blue-500/10 px-3 py-1 text-xs font-medium text-blue-600 dark:text-blue-400"
               >
                 {inst}
               </span>
@@ -347,7 +347,7 @@ export default function FeedbackDetailPage() {
                   <span
                     className={`rounded-full px-2 py-0.5 text-xs font-semibold ${
                       value !== null
-                        ? "bg-indigo-500/15 text-indigo-600 dark:text-indigo-400"
+                        ? "bg-blue-500/15 text-blue-600 dark:text-blue-400"
                         : "bg-[var(--border)]/30 text-[var(--muted)]"
                     }`}
                   >
@@ -362,8 +362,8 @@ export default function FeedbackDetailPage() {
                       onClick={() => handleRatingChange(category.key, n)}
                       className={`h-8 w-8 rounded-lg text-xs font-semibold transition-all duration-150 ${
                         value === n
-                          ? "bg-gradient-to-br from-indigo-600 to-violet-600 text-white shadow-sm scale-105"
-                          : "border border-[var(--border)] bg-[var(--surface)] text-[var(--muted)] hover:border-indigo-400 hover:text-indigo-600 dark:hover:text-indigo-400"
+                          ? "bg-blue-600 text-white shadow-sm scale-105"
+                          : "border border-[var(--border)] bg-[var(--surface)] text-[var(--muted)] hover:border-blue-400 hover:text-blue-600 dark:hover:text-blue-400"
                       }`}
                     >
                       {n}
@@ -380,7 +380,7 @@ export default function FeedbackDetailPage() {
             type="button"
             onClick={handleRatingSubmit}
             disabled={ratingSubmitting || !allRated}
-            className="rounded-lg bg-gradient-to-r from-indigo-600 to-violet-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-all duration-200 hover:shadow-md hover:shadow-indigo-600/20 active:scale-95 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:shadow-sm"
+            className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-all duration-200 hover:shadow-md hover:shadow-blue-600/20 active:scale-95 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:shadow-sm"
           >
             {ratingSubmitting ? "Saving ratings..." : "Submit ratings"}
           </button>
@@ -405,13 +405,13 @@ export default function FeedbackDetailPage() {
             <textarea
               value={commentText}
               onChange={(e) => setCommentText(e.target.value)}
-              className="min-h-24 w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] px-4 py-3 text-sm text-[var(--foreground)] outline-none transition-all placeholder:text-[var(--muted)]/70 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/30"
+              className="min-h-24 w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] px-4 py-3 text-sm text-[var(--foreground)] outline-none transition-all placeholder:text-[var(--muted)]/70 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30"
               placeholder="Write your feedback here..."
             />
             <button
               onClick={handleCommentSubmit}
               disabled={commentSubmitting || !commentText.trim()}
-              className="rounded-lg bg-gradient-to-r from-indigo-600 to-violet-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-all duration-200 hover:shadow-md hover:shadow-indigo-600/20 active:scale-95 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:shadow-sm"
+              className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-all duration-200 hover:shadow-md hover:shadow-blue-600/20 active:scale-95 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:shadow-sm"
             >
               {commentSubmitting ? "Posting comment..." : "Submit comment"}
             </button>
@@ -427,7 +427,7 @@ export default function FeedbackDetailPage() {
           {comments.map((comment) => (
             <div
               key={comment.id}
-              className="border-l-2 border-[var(--border)] pl-3 py-1.5 transition-colors hover:border-indigo-400/60"
+              className="border-l-2 border-[var(--border)] pl-3 py-1.5 transition-colors hover:border-blue-400/60"
             >
               <div className="flex items-center justify-between gap-3">
                 <p className="text-sm font-medium text-[var(--foreground)]">

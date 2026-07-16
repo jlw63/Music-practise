@@ -53,8 +53,8 @@ export function NavBar() {
   const linkClass = (href: string) => {
     return `relative px-3 py-2 rounded-md font-medium text-sm transition-all duration-200 group ${
       isActive(href)
-        ? "text-indigo-900 bg-indigo-200/80 dark:text-indigo-200 dark:bg-indigo-950/60 border border-indigo-300/50 dark:border-indigo-800/50 shadow-sm"
-        : "text-foreground border border-transparent hover:text-indigo-700 hover:bg-indigo-50 hover:border-indigo-200/70 hover:-translate-y-[1px] dark:hover:text-indigo-300 dark:hover:bg-indigo-500/10 dark:hover:border-indigo-400/30"
+        ? "text-blue-900 bg-blue-200/80 dark:text-blue-200 dark:bg-blue-950/60 border border-blue-300/50 dark:border-blue-800/50 shadow-sm"
+        : "text-foreground border border-transparent hover:text-blue-700 hover:bg-blue-50 hover:border-blue-200/70 hover:-translate-y-[1px] dark:hover:text-blue-300 dark:hover:bg-blue-500/10 dark:hover:border-blue-400/30"
     }`;
   };
 
@@ -62,7 +62,7 @@ export function NavBar() {
   const underline = (href: string) => {
     if (isActive(href)) return null;
     return (
-      <span className="pointer-events-none absolute left-3 right-3 -bottom-0.5 h-[2px] scale-x-0 bg-indigo-500 dark:bg-indigo-400 origin-left transition-transform duration-200 group-hover:scale-x-100 rounded-full" />
+      <span className="pointer-events-none absolute left-3 right-3 -bottom-0.5 h-[2px] scale-x-0 bg-blue-500 dark:bg-blue-400 origin-left transition-transform duration-200 group-hover:scale-x-100 rounded-full" />
     );
   };
 
@@ -80,7 +80,7 @@ export function NavBar() {
   const mobileLinkClass = (href: string) =>
     `block rounded-lg px-4 py-2.5 text-sm font-medium transition-colors ${
       isActive(href)
-        ? "bg-indigo-500/10 text-indigo-600 dark:text-indigo-400"
+        ? "bg-blue-500/10 text-blue-600 dark:text-blue-400"
         : "text-foreground hover:bg-[var(--border)]/30"
     }`;
 
@@ -94,7 +94,7 @@ export function NavBar() {
             onClick={() => setMenuOpen((o) => !o)}
             aria-label="Toggle menu"
             aria-expanded={menuOpen}
-            className="sm:hidden p-2 rounded-md border border-[var(--border)] bg-[var(--surface)] text-foreground transition-all duration-200 hover:bg-indigo-50 hover:text-indigo-700 dark:hover:bg-indigo-500/10 dark:hover:text-indigo-300"
+            className="sm:hidden p-2 rounded-md border border-[var(--border)] bg-[var(--surface)] text-foreground transition-all duration-200 hover:bg-blue-50 hover:text-blue-700 dark:hover:bg-blue-500/10 dark:hover:text-blue-300"
           >
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="h-5 w-5">
               {menuOpen ? (
@@ -106,10 +106,14 @@ export function NavBar() {
           </button>
 
           <Link
-            href="/music-social"
-            className="text-xl font-bold tracking-tight bg-gradient-to-r from-indigo-600 to-violet-500 dark:from-indigo-400 dark:to-violet-300 bg-clip-text text-transparent hover:opacity-80 transition"
+            href="/riff"
+            className="flex items-center gap-2 hover:opacity-80 transition"
           >
-            MusicSocial
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/logo.svg" alt="" className="h-7 w-7" />
+            <span className="text-xl font-bold tracking-tight text-blue-600 dark:text-blue-400">
+              riff
+            </span>
           </Link>
         </div>
 
@@ -148,7 +152,7 @@ export function NavBar() {
           <button
             onClick={toggleTheme}
             aria-label="Toggle theme"
-            className="p-2 rounded-md border border-[var(--border)] bg-[var(--surface)] text-foreground hover:bg-indigo-50 hover:text-indigo-700 hover:border-indigo-200/70 dark:hover:bg-indigo-500/10 dark:hover:text-indigo-300 dark:hover:border-indigo-400/30 transition-all duration-200 hover:-translate-y-[1px]"
+            className="p-2 rounded-md border border-[var(--border)] bg-[var(--surface)] text-foreground hover:bg-blue-50 hover:text-blue-700 hover:border-blue-200/70 dark:hover:bg-blue-500/10 dark:hover:text-blue-300 dark:hover:border-blue-400/30 transition-all duration-200 hover:-translate-y-[1px]"
           >
             {theme === "dark" ? "🌙" : "☀️"}
           </button>
@@ -157,13 +161,13 @@ export function NavBar() {
             <>
               <Link
                 href="/login"
-                className="text-sm font-semibold text-foreground px-3 py-2 rounded-md border border-transparent hover:bg-indigo-50 hover:text-indigo-700 hover:border-indigo-200/70 dark:hover:bg-indigo-500/10 dark:hover:text-indigo-300 dark:hover:border-indigo-400/30 transition-all duration-200"
+                className="text-sm font-semibold text-foreground px-3 py-2 rounded-md border border-transparent hover:bg-blue-50 hover:text-blue-700 hover:border-blue-200/70 dark:hover:bg-blue-500/10 dark:hover:text-blue-300 dark:hover:border-blue-400/30 transition-all duration-200"
               >
                 Login
               </Link>
               <Link
                 href="/signup"
-                className="bg-gradient-to-r from-indigo-600 to-violet-600 text-white text-sm font-semibold px-3 py-2 rounded-md shadow-sm hover:shadow-md hover:shadow-indigo-500/30 hover:-translate-y-[1px] active:scale-95 active:translate-y-0 transition-all duration-200"
+                className="bg-blue-600 text-white text-sm font-semibold px-3 py-2 rounded-md shadow-sm hover:shadow-md hover:shadow-blue-500/30 hover:-translate-y-[1px] active:scale-95 active:translate-y-0 transition-all duration-200"
               >
                 Signup
               </Link>
@@ -173,9 +177,9 @@ export function NavBar() {
               <Link
                 href="/profile"
                 title="View Profile"
-                className="flex items-center gap-1.5 text-sm font-semibold text-foreground px-3 py-1.5 rounded-full border border-gray-300 dark:border-slate-700 bg-[var(--surface)] hover:border-indigo-500 hover:bg-indigo-50 hover:shadow-sm dark:hover:border-indigo-400 dark:hover:bg-indigo-500/10 transition-all duration-200"
+                className="flex items-center gap-1.5 text-sm font-semibold text-foreground px-3 py-1.5 rounded-full border border-gray-300 dark:border-slate-700 bg-[var(--surface)] hover:border-blue-500 hover:bg-blue-50 hover:shadow-sm dark:hover:border-blue-400 dark:hover:bg-blue-500/10 transition-all duration-200"
               >
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4 text-indigo-600 dark:text-indigo-400">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4 text-blue-600 dark:text-blue-400">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
                 </svg>
                 <span className="max-w-[100px] truncate hidden sm:inline">
