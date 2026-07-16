@@ -135,6 +135,7 @@ export default function Home() {
         <PostCard
           key={post.id}
           post={post}
+          variant="feed"
         />
       ))}
 

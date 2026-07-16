@@ -538,7 +538,7 @@ export default function ProfilePage() {
               </div>
             </div>
           ) : (
-            <PostCard post={post} />
+            <PostCard post={post} variant="feed" />
           )}
         </div>
       ))}

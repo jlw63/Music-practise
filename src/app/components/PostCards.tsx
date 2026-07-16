@@ -5,6 +5,7 @@ import { useToast } from "@/context/ToastContext";
 import { supabase } from "@/lib/supabase";
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { timeAgo } from "@/lib/timeAgo";
 
 type Post = {
   id: string;
@@ -30,11 +31,21 @@ type Comment = {
 
 type Props = {
   post: Post;
+  variant?: "feed" | "detail";
 };
 
-export default function PostCard({ post }: Props) {
+function youtubeThumbnail(videoUrl?: string) {
+  if (!videoUrl) return null;
+  const match = videoUrl.match(/embed\/([^?&/]+)/);
+  if (!match) return null;
+  return `https://img.youtube.com/vi/${match[1]}/hqdefault.jpg`;
+}
+
+export default function PostCard({ post, variant = "detail" }: Props) {
   const { user } = useAuth();
   const { toast } = useToast();
+  const [videoPlaying, setVideoPlaying] = useState(variant === "detail");
+  const thumbnail = youtubeThumbnail(post.video_url);
 
   const [authorUsername, setAuthorUsername] = useState<string | null>(
     post.profiles?.[0]?.username || null
@@ -257,40 +268,55 @@ export default function PostCard({ post }: Props) {
     setComments(resolved || []);
   }
 
+  async function handleShare() {
+    const url = `${window.location.origin}/post/${post.id}`;
+    try {
+      await navigator.clipboard.writeText(url);
+      toast("Link copied to clipboard", "success");
+    } catch {
+      toast(url, "info");
+    }
+  }
+
   return (
     <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-5 mb-4 shadow-sm transition-shadow duration-200 hover:shadow-md">
+      {/* Community/genre badge */}
+      {post.genre && (
+        <Link
+          href={`/search?genre=${encodeURIComponent(post.genre)}`}
+          className="inline-block rounded-full bg-blue-500/10 px-3 py-1 text-xs font-semibold text-blue-600 transition hover:bg-blue-500/20 dark:text-blue-400"
+        >
+          {post.genre}
+        </Link>
+      )}
+
+      {/* Title */}
+      <h2 className="mt-2 text-2xl font-bold tracking-tight text-[var(--foreground)]">
+        {post.title}
+      </h2>
+
       {/* Author + date */}
-      <div className="flex items-center justify-between">
+      <div className="mt-1 flex items-center gap-1.5 text-xs text-[var(--muted)]">
         <Link
           href={`/profile/${post.author_id}`}
-          className="text-base font-semibold text-[var(--foreground)] transition-colors hover:text-blue-600 dark:hover:text-blue-400"
+          className="font-medium transition-colors hover:text-blue-600 dark:hover:text-blue-400"
         >
           {authorUsername ?? "Unknown"}
         </Link>
-        <p className="text-xs text-[var(--muted)]">
-          {new Date(post.created_at).toLocaleDateString()}
-        </p>
+        <span>·</span>
+        <span>{timeAgo(post.created_at)}</span>
       </div>
 
-      {/* Title + content */}
-      <h2 className="mt-2 text-xl font-bold tracking-tight text-[var(--foreground)]">
-        {post.title}
-      </h2>
-      <p className="mt-1.5 text-sm leading-relaxed text-[var(--foreground)]/90">
+      <p className="mt-2.5 text-sm leading-relaxed text-[var(--foreground)]/90">
         {post.content}
       </p>
 
-      {/* Tags: genre, instruments, status */}
-      {(post.genre || (post.instruments && post.instruments.length > 0) || post.status === "wip") && (
+      {/* Tags: instruments, status */}
+      {((post.instruments && post.instruments.length > 0) || post.status === "wip") && (
         <div className="mt-2.5 flex flex-wrap gap-1.5">
           {post.status === "wip" && (
             <span className="rounded-full bg-amber-500/10 px-3 py-1 text-xs font-medium text-amber-600 dark:text-amber-400">
               WIP
-            </span>
-          )}
-          {post.genre && (
-            <span className="rounded-full bg-blue-500/10 px-3 py-1 text-xs font-medium text-blue-600 dark:text-blue-400">
-              {post.genre}
             </span>
           )}
           {post.instruments?.map((inst) => (
@@ -306,109 +332,173 @@ export default function PostCard({ post }: Props) {
 
       {/* Video */}
       {post.type === "video" && post.video_url && (
-        <div className="mt-4 aspect-video w-full overflow-hidden rounded-xl border border-[var(--border)]">
-          <iframe className="h-full w-full" src={post.video_url} allowFullScreen />
+        <div
+          className={`mt-4 w-full overflow-hidden rounded-xl border border-[var(--border)] ${
+            variant === "feed" ? "h-[300px]" : "aspect-video"
+          }`}
+        >
+          {videoPlaying ? (
+            <iframe className="h-full w-full" src={post.video_url} allowFullScreen />
+          ) : (
+            <button
+              onClick={() => setVideoPlaying(true)}
+              className="group relative block h-full w-full"
+              aria-label="Play video"
+            >
+              {thumbnail ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={thumbnail}
+                  alt=""
+                  className="h-full w-full object-cover"
+                  loading="lazy"
+                />
+              ) : (
+                <div className="h-full w-full bg-[var(--border)]/30" />
+              )}
+              <span className="absolute inset-0 flex items-center justify-center bg-black/20 transition group-hover:bg-black/30">
+                <span className="flex h-14 w-14 items-center justify-center rounded-full bg-white/90 text-2xl text-blue-600 shadow-lg transition group-hover:scale-105">
+                  ▶
+                </span>
+              </span>
+            </button>
+          )}
         </div>
       )}
 
-      {/* Like button */}
-      <button
-        onClick={handleLike}
-        className={`mt-4 flex items-center gap-1.5 rounded-full px-4 py-1.5 text-sm font-medium transition-all duration-200 active:scale-95 ${
-          likes.liked
-            ? "bg-red-500/10 text-red-500 border border-red-500/30 hover:bg-red-500/15"
-            : "bg-[var(--border)]/20 text-[var(--muted)] border border-transparent hover:text-red-500 hover:bg-red-500/5"
-        }`}
-      >
-        <span className={likes.liked ? "" : "opacity-70"}>{likes.liked ? "♥" : "♡"}</span>
-        {likes.count}
-      </button>
-
-      {/* Comments */}
-      <h3 className="mt-6 mb-2 text-xs font-semibold uppercase tracking-wider text-[var(--muted)]">
-        Comments
-      </h3>
-
-      <div className="space-y-2">
-        {comments.map((comment) => (
-          <div
-            key={comment.id}
-            className="border-l-2 border-[var(--border)] pl-3 py-1.5 transition-colors hover:border-blue-400/60"
-          >
-            <p className="text-sm font-medium text-[var(--foreground)]">
-              {comment.profiles?.[0]?.username ?? "Unknown"}
-            </p>
-
-            {editingCommentId === comment.id ? (
-              <div className="mt-1.5">
-                <input
-                  className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-sm text-[var(--foreground)] outline-none transition-all focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30"
-                  value={editComment}
-                  onChange={(e) => setEditComment(e.target.value)}
-                />
-                <div className="mt-2 flex gap-2">
-                  <button
-                    onClick={() => saveComment(comment.id)}
-                    className="rounded-md bg-blue-600 px-3 py-1 text-xs font-semibold text-white transition hover:bg-blue-500"
-                  >
-                    Save
-                  </button>
-                  <button
-                    onClick={() => setEditingCommentId(null)}
-                    className="rounded-md border border-[var(--border)] px-3 py-1 text-xs font-medium text-[var(--muted)] transition hover:text-[var(--foreground)]"
-                  >
-                    Cancel
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <>
-                <p className="text-sm text-[var(--foreground)]/90">{comment.content}</p>
-
-                {user?.id === comment.author_id && (
-                  <div className="mt-1 flex gap-3">
-                    <button
-                      onClick={() => {
-                        setEditingCommentId(comment.id);
-                        setEditComment(comment.content);
-                      }}
-                      className="text-xs font-medium text-[var(--muted)] transition hover:text-blue-600 dark:hover:text-blue-400"
-                    >
-                      Edit
-                    </button>
-                    <button
-                      onClick={() => deleteComment(comment.id)}
-                      className="text-xs font-medium text-[var(--muted)] transition hover:text-red-500"
-                    >
-                      Delete
-                    </button>
-                  </div>
-                )}
-              </>
-            )}
-          </div>
-        ))}
-      </div>
-
-      {/* New comment */}
-      <div className="mt-4 flex gap-2">
-        <input
-          className="flex-1 rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-sm text-[var(--foreground)] outline-none transition-all placeholder:text-[var(--muted)]/70 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30"
-          value={newComment}
-          onChange={(e) => setNewComment(e.target.value)}
-          placeholder="Join discussion..."
-          onKeyDown={(e) => {
-            if (e.key === "Enter") handleComment();
-          }}
-        />
+      {/* Engagement row */}
+      <div className="mt-4 flex items-center gap-2 border-t border-[var(--border)] pt-3">
         <button
-          onClick={handleComment}
-          disabled={!newComment.trim()}
-          className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-all duration-200 hover:shadow-md hover:shadow-blue-600/20 active:scale-95 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:shadow-sm"
+          onClick={handleLike}
+          className={`flex items-center gap-1.5 rounded-full px-4 py-1.5 text-sm font-medium transition-all duration-200 active:scale-95 ${
+            likes.liked
+              ? "bg-blue-500/10 text-blue-600 dark:text-blue-400"
+              : "text-[var(--muted)] hover:bg-blue-500/5 hover:text-blue-600 dark:hover:text-blue-400"
+          }`}
         >
-          Send
+          <span className={likes.liked ? "" : "opacity-70"}>{likes.liked ? "♥" : "♡"}</span>
+          {likes.count}
+        </button>
+        {variant === "feed" ? (
+          <Link
+            href={`/post/${post.id}`}
+            className="flex items-center gap-1.5 rounded-full px-4 py-1.5 text-sm font-medium text-[var(--muted)] transition-all duration-200 hover:bg-blue-500/5 hover:text-blue-600 dark:hover:text-blue-400"
+          >
+            💬 {comments.length} comment{comments.length === 1 ? "" : "s"}
+          </Link>
+        ) : (
+          <span className="flex items-center gap-1.5 rounded-full px-4 py-1.5 text-sm font-medium text-[var(--muted)]">
+            💬 {comments.length}
+          </span>
+        )}
+        <button
+          onClick={handleShare}
+          className="flex items-center gap-1.5 rounded-full px-4 py-1.5 text-sm font-medium text-[var(--muted)] transition-all duration-200 hover:bg-blue-500/5 hover:text-blue-600 active:scale-95 dark:hover:text-blue-400"
+        >
+          ↗ Share
         </button>
       </div>
+
+      {/* Comments */}
+      {variant === "detail" && (
+        <>
+          <h3 className="mt-6 mb-2 text-xs font-semibold uppercase tracking-wider text-[var(--muted)]">
+            Comments · {comments.length}
+          </h3>
+
+          {comments.length === 0 && (
+            <p className="mb-2 text-sm text-[var(--muted)]">Be the first to riff on this.</p>
+          )}
+
+          <div className="divide-y divide-[var(--border)]">
+            {comments.map((comment) => (
+              <div key={comment.id} className="flex gap-2.5 py-3 first:pt-0">
+                <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-blue-600 text-[11px] font-bold text-white">
+                  {(comment.profiles?.[0]?.username ?? "?")[0]?.toUpperCase()}
+                </div>
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-sm font-medium text-[var(--foreground)]">
+                      {comment.profiles?.[0]?.username ?? "Unknown"}
+                    </span>
+                    <span className="text-xs text-[var(--muted)]">
+                      · {timeAgo(comment.created_at)}
+                    </span>
+                  </div>
+
+                  {editingCommentId === comment.id ? (
+                    <div className="mt-1.5">
+                      <input
+                        className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-sm text-[var(--foreground)] outline-none transition-all focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30"
+                        value={editComment}
+                        onChange={(e) => setEditComment(e.target.value)}
+                      />
+                      <div className="mt-2 flex gap-2">
+                        <button
+                          onClick={() => saveComment(comment.id)}
+                          className="rounded-md bg-blue-600 px-3 py-1 text-xs font-semibold text-white transition hover:bg-blue-500"
+                        >
+                          Save
+                        </button>
+                        <button
+                          onClick={() => setEditingCommentId(null)}
+                          className="rounded-md border border-[var(--border)] px-3 py-1 text-xs font-medium text-[var(--muted)] transition hover:text-[var(--foreground)]"
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <>
+                      <p className="mt-0.5 text-sm text-[var(--foreground)]/90">{comment.content}</p>
+
+                      {user?.id === comment.author_id && (
+                        <div className="mt-1 flex gap-3">
+                          <button
+                            onClick={() => {
+                              setEditingCommentId(comment.id);
+                              setEditComment(comment.content);
+                            }}
+                            className="text-xs font-medium text-[var(--muted)] transition hover:text-blue-600 dark:hover:text-blue-400"
+                          >
+                            Edit
+                          </button>
+                          <button
+                            onClick={() => deleteComment(comment.id)}
+                            className="text-xs font-medium text-[var(--muted)] transition hover:text-red-500"
+                          >
+                            Delete
+                          </button>
+                        </div>
+                      )}
+                    </>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* New comment */}
+          <div className="mt-4 flex gap-2">
+            <input
+              className="flex-1 rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-sm text-[var(--foreground)] outline-none transition-all placeholder:text-[var(--muted)]/70 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30"
+              value={newComment}
+              onChange={(e) => setNewComment(e.target.value)}
+              placeholder="Join discussion..."
+              onKeyDown={(e) => {
+                if (e.key === "Enter") handleComment();
+              }}
+            />
+            <button
+              onClick={handleComment}
+              disabled={!newComment.trim()}
+              className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-all duration-200 hover:shadow-md hover:shadow-blue-600/20 active:scale-95 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:shadow-sm"
+            >
+              Reply
+            </button>
+          </div>
+        </>
+      )}
     </div>
   );
 }

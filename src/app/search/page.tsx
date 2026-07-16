@@ -1,8 +1,9 @@
 "use client";
 
 import { supabase } from "@/lib/supabase";
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import UserList from "@/app/components/UserList";
 import { timeAgo } from "@/lib/timeAgo";
 
@@ -24,9 +25,10 @@ type PostResult = {
 
 type StatusFilter = "any" | "wip" | "finished";
 
-export default function SearchPage() {
-  const [query, setQuery] = useState("");
-  const [genreFilter, setGenreFilter] = useState("");
+function SearchPageInner() {
+  const searchParams = useSearchParams();
+  const [query, setQuery] = useState(() => searchParams.get("q") ?? "");
+  const [genreFilter, setGenreFilter] = useState(() => searchParams.get("genre") ?? "");
   const [instrumentFilter, setInstrumentFilter] = useState("");
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("any");
   const [users, setUsers] = useState<UserResult[]>([]);
@@ -232,5 +234,13 @@ export default function SearchPage() {
         </div>
       )}
     </div>
+  );
+}
+
+export default function SearchPage() {
+  return (
+    <Suspense fallback={null}>
+      <SearchPageInner />
+    </Suspense>
   );
 }

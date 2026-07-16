@@ -20,7 +20,7 @@ export default function RootLayout({children}: {children: React.ReactNode}) {
             <ToastProvider>
               <PostProvider>
                 <NavBar />
-                <main className="py-20 max-w-6xl mx-auto">
+                <main className="pt-6 pb-16 sm:pt-8 max-w-6xl mx-auto">
                   {children}
                 </main>
               </PostProvider>

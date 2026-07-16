@@ -156,6 +156,8 @@ key={post.id}
 
 post={post}
 
+variant="feed"
+
 />
 
 ))}
