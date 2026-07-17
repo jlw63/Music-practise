@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
+import { timeAgo } from "@/lib/timeAgo";
 
 type FeedbackPost = {
   id: string;
@@ -12,7 +13,6 @@ type FeedbackPost = {
   video_url?: string;
   created_at: string;
   author_id: string;
-  is_anonymous?: boolean;
   genre?: string | null;
   instruments?: string[] | null;
   status?: "wip" | "finished" | null;
@@ -59,7 +59,7 @@ export default function FeedbackFeedPage() {
   }, []);
 
   return (
-    <div className="max-w-3xl mx-auto space-y-6">
+    <div className="mx-auto max-w-[720px] space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-semibold">Feedback Feed</h1>
@@ -69,7 +69,7 @@ export default function FeedbackFeedPage() {
           href="/create"
           className="rounded bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
         >
-          New feedback
+          Share feedback
         </Link>
       </div>
 
@@ -83,7 +83,7 @@ export default function FeedbackFeedPage() {
 
       <div className="space-y-3">
         {posts.map((post) => {
-          const authorName = post.profiles?.[0]?.username || "Unknown";
+          const authorName = post.profiles?.[0]?.username || "Anonymous";
 
           return (
             <Link
@@ -91,39 +91,43 @@ export default function FeedbackFeedPage() {
               href={`/feedback/${post.id}`}
               className="block rounded-lg border p-4 transition hover:border-blue-500 hover:shadow-sm"
             >
-              <div className="flex items-center justify-between gap-3">
-                <div>
-                  <h2 className="text-lg font-semibold text-foreground">{post.title}</h2>
-                  <p className="mt-1 text-sm text-muted">{post.content}</p>
-                  {(post.genre || (post.instruments && post.instruments.length > 0) || post.status === "wip") && (
-                    <div className="mt-2 flex flex-wrap gap-1.5">
-                      {post.status === "wip" && (
-                        <span className="rounded-full bg-amber-500/10 px-3 py-1 text-xs font-medium text-amber-600 dark:text-amber-400">
-                          WIP
-                        </span>
-                      )}
-                      {post.genre && (
-                        <span className="rounded-full bg-blue-500/10 px-3 py-1 text-xs font-medium text-blue-600 dark:text-blue-400">
-                          {post.genre}
-                        </span>
-                      )}
-                      {post.instruments?.map((inst) => (
-                        <span
-                          key={inst}
-                          className="rounded-full bg-blue-500/10 px-3 py-1 text-xs font-medium text-blue-600 dark:text-blue-400"
-                        >
-                          {inst}
-                        </span>
-                      ))}
-                    </div>
+              <h2 className="text-lg font-semibold text-foreground">{post.title}</h2>
+              <p className="mt-0.5 text-xs text-muted">
+                by {authorName} · {timeAgo(post.created_at)}
+              </p>
+              <p className="mt-2 text-sm text-muted line-clamp-2">{post.content}</p>
+              {(post.genre || (post.instruments && post.instruments.length > 0) || post.status === "wip") && (
+                <div className="mt-2 flex flex-wrap gap-1.5">
+                  {post.status === "wip" && (
+                    <span className="rounded-full bg-amber-500/10 px-3 py-1 text-xs font-medium text-amber-600 dark:text-amber-400">
+                      WIP
+                    </span>
                   )}
+                  {post.genre && (
+                    <span className="rounded-full bg-blue-500/10 px-3 py-1 text-xs font-medium text-blue-600 dark:text-blue-400">
+                      {post.genre}
+                    </span>
+                  )}
+                  {post.instruments?.map((inst) => (
+                    <span
+                      key={inst}
+                      className="rounded-full bg-blue-500/10 px-3 py-1 text-xs font-medium text-blue-600 dark:text-blue-400"
+                    >
+                      {inst}
+                    </span>
+                  ))}
                 </div>
-                <span className="text-xs text-muted">by {authorName}</span>
-              </div>
+              )}
             </Link>
           );
         })}
       </div>
+
+      {!loading && posts.length > 0 && posts.length < 3 && (
+        <p className="text-center text-sm text-muted">
+          {posts.length} {posts.length === 1 ? "suggestion" : "suggestions"} so far — add yours.
+        </p>
+      )}
     </div>
   );
 }

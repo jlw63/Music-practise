@@ -76,7 +76,7 @@ export function NavBar() {
   const linkClass = (href: string) => {
     return `relative px-3 py-2 rounded-md font-medium text-sm transition-all duration-200 group ${
       isActive(href)
-        ? "text-blue-900 bg-blue-200/80 dark:text-blue-200 dark:bg-blue-950/60 border border-blue-300/50 dark:border-blue-800/50 shadow-sm"
+        ? "text-blue-900 bg-blue-200/80 dark:text-blue-200 dark:bg-blue-500/25 border border-blue-300/50 dark:border-blue-400/40 shadow-sm"
         : "text-foreground border border-transparent hover:text-blue-700 hover:bg-blue-50 hover:border-blue-200/70 hover:-translate-y-[1px] dark:hover:text-blue-300 dark:hover:bg-blue-500/10 dark:hover:border-blue-400/30"
     }`;
   };
