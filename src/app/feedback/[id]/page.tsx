@@ -84,25 +84,14 @@ export default function FeedbackDetailPage() {
   const [replyingTo, setReplyingTo] = useState<string | null>(null);
   const [replyText, setReplyText] = useState("");
   const [submittingReply, setSubmittingReply] = useState(false);
-  // scores start empty on purpose — pre-filled scores invite lazy straight-10s
-  const [ratings, setRatings] = useState<Ratings>(() => {
-    if (typeof window === "undefined" || !postId) return EMPTY_RATINGS;
-    try {
-      const stored = window.localStorage.getItem(`feedback-ratings-${postId}`);
-      if (!stored) return EMPTY_RATINGS;
-      const parsed = JSON.parse(stored);
-      return {
-        overall: parsed.overall ?? null,
-        accuracy: parsed.accuracy ?? null,
-        dynamics: parsed.dynamics ?? null,
-        interpretation: parsed.interpretation ?? null,
-        technique: parsed.technique ?? null,
-      };
-    } catch {
-      return EMPTY_RATINGS;
-    }
-  });
+  // scores start empty on purpose — pre-filled scores invite lazy straight-10s.
+  // Populated from the server (per-user) once fetchOwnRating resolves below —
+  // never from localStorage, which has no per-user scope and would leak one
+  // user's ratings to the next person on the same browser.
+  const [ratings, setRatings] = useState<Ratings>(EMPTY_RATINGS);
   const [submitting, setSubmitting] = useState(false);
+  const [hasExistingRating, setHasExistingRating] = useState(false);
+  const prefillDone = useRef(false);
 
   // current playback time of the YouTube embed, streamed via the iframe API
   const videoRef = useRef<HTMLIFrameElement | null>(null);
@@ -244,12 +233,48 @@ export default function FeedbackDetailPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [postId]);
 
+  // pull the reviewer's own previously-submitted rating from the server so
+  // resubmitting edits it in place instead of masquerading as a fresh rating
+  useEffect(() => {
+    if (!postId || !user) return;
+
+    async function fetchOwnRating() {
+      const { data } = await supabase
+        .from("feedback_ratings")
+        .select("rating, accuracy, dynamics, interpretation, technique")
+        .eq("post_id", postId)
+        .eq("user_id", user!.id)
+        .maybeSingle();
+
+      if (data) {
+        const next: Ratings = {
+          overall: data.rating,
+          accuracy: data.accuracy,
+          dynamics: data.dynamics,
+          interpretation: data.interpretation,
+          technique: data.technique,
+        };
+        setRatings(next);
+        setHasExistingRating(true);
+      }
+    }
+
+    fetchOwnRating();
+  }, [postId, user]);
+
+  // prefill the written-feedback box with the reviewer's own existing top-level
+  // comment (once) so re-submitting edits it instead of adding a duplicate
+  useEffect(() => {
+    if (prefillDone.current || !user) return;
+    const own = comments.find((c) => c.author_id === user.id && !c.parent_id);
+    if (own) {
+      setCommentText(own.content);
+      prefillDone.current = true;
+    }
+  }, [comments, user]);
+
   function handleRatingChange(category: keyof Ratings, nextRating: number) {
-    setRatings((prev) => {
-      const next = { ...prev, [category]: nextRating };
-      window.localStorage.setItem(`feedback-ratings-${postId}`, JSON.stringify(next));
-      return next;
-    });
+    setRatings((prev) => ({ ...prev, [category]: nextRating }));
   }
 
   function insertTimestamp() {
@@ -281,47 +306,69 @@ export default function FeedbackDetailPage() {
     if (ratingError) {
       console.log("Rating save skipped:", ratingError);
     } else {
+      setHasExistingRating(true);
       fetchRatingStats();
     }
 
     if (commentText.trim()) {
-      const { error: commentError } = await supabase.from("comments").insert({
-        post_id: post.id,
-        author_id: user.id,
-        content: commentText.trim(),
-      });
+      const ownComment = comments.find((c) => c.author_id === user.id && !c.parent_id);
 
-      if (commentError) {
-        toast("Could not post your feedback: " + commentError.message, "error");
-        setSubmitting(false);
-        return;
+      if (ownComment) {
+        const { error: updateError } = await supabase
+          .from("comments")
+          .update({ content: commentText.trim() })
+          .eq("id", ownComment.id);
+
+        if (updateError) {
+          toast("Could not update your feedback: " + updateError.message, "error");
+          setSubmitting(false);
+          return;
+        }
+
+        setComments((prev) =>
+          prev.map((c) => (c.id === ownComment.id ? { ...c, content: commentText.trim() } : c))
+        );
+      } else {
+        const { error: commentError } = await supabase.from("comments").insert({
+          post_id: post.id,
+          author_id: user.id,
+          content: commentText.trim(),
+        });
+
+        if (commentError) {
+          toast("Could not post your feedback: " + commentError.message, "error");
+          setSubmitting(false);
+          return;
+        }
+
+        const { data: latestComment } = await supabase
+          .from("comments")
+          .select(`
+            id,
+            content,
+            created_at,
+            author_id,
+            parent_id,
+            profiles!comments_author_id_fkey(username)
+          `)
+          .eq("post_id", post.id)
+          .order("created_at", { ascending: false })
+          .limit(1)
+          .single();
+
+        if (latestComment) {
+          const comment = latestComment as unknown as Comment;
+          setComments((prev) => [...prev, comment]);
+          setCommentLikes((prev) => ({ ...prev, [comment.id]: { count: 0, liked: false } }));
+        }
       }
-
-      const { data: latestComment } = await supabase
-        .from("comments")
-        .select(`
-          id,
-          content,
-          created_at,
-          author_id,
-          parent_id,
-          profiles!comments_author_id_fkey(username)
-        `)
-        .eq("post_id", post.id)
-        .order("created_at", { ascending: false })
-        .limit(1)
-        .single();
-
-      if (latestComment) {
-        const comment = latestComment as unknown as Comment;
-        setComments((prev) => [...prev, comment]);
-        setCommentLikes((prev) => ({ ...prev, [comment.id]: { count: 0, liked: false } }));
-      }
-      setCommentText("");
     }
 
     setSubmitting(false);
-    toast("Feedback submitted — thanks for helping them improve! 🎵", "success");
+    toast(
+      hasExistingRating ? "Feedback updated 🎵" : "Feedback submitted — thanks for helping them improve! 🎵",
+      "success"
+    );
   }
 
   async function handleReplySubmit(parentId: string) {
@@ -694,6 +741,11 @@ export default function FeedbackDetailPage() {
               1 = needs improvement · 10 = basically perfect
             </span>
           </div>
+          {hasExistingRating && (
+            <p className="text-xs text-blue-600 dark:text-blue-400">
+              You've already rated this — editing below updates your existing feedback.
+            </p>
+          )}
 
           {!user ? (
             <p className="pt-3 text-sm text-[var(--muted)]">Log in to give feedback.</p>
@@ -780,7 +832,13 @@ export default function FeedbackDetailPage() {
                   disabled={submitting || ratings.overall === null}
                   className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-all duration-200 hover:shadow-md hover:shadow-blue-600/20 active:scale-95 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:shadow-sm"
                 >
-                  {submitting ? "Submitting..." : "Submit feedback"}
+                  {submitting
+                    ? hasExistingRating
+                      ? "Updating..."
+                      : "Submitting..."
+                    : hasExistingRating
+                      ? "Update feedback"
+                      : "Submit feedback"}
                 </button>
                 {ratings.overall === null && (
                   <p className="text-xs text-[var(--muted)]">
