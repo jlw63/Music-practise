@@ -18,7 +18,7 @@ type FeedbackPost = {
   status?: "wip" | "finished" | null;
   profiles?: {
     username: string;
-  }[];
+  };
 };
 
 export default function FeedbackFeedPage() {
@@ -51,7 +51,7 @@ export default function FeedbackFeedPage() {
         return;
       }
 
-      setPosts(data || []);
+      setPosts((data ?? []) as unknown as FeedbackPost[]);
       setLoading(false);
     }
 
@@ -83,7 +83,7 @@ export default function FeedbackFeedPage() {
 
       <div className="space-y-3">
         {posts.map((post) => {
-          const authorName = post.profiles?.[0]?.username || "Anonymous";
+          const authorName = post.profiles?.username || "Anonymous";
 
           return (
             <Link

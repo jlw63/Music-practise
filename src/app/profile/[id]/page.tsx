@@ -28,7 +28,7 @@ type Post = {
   status?: "wip" | "finished" | null;
   profiles?: {
     username: string;
-  }[];
+  };
 };
 
 type ListUser = {
@@ -89,7 +89,7 @@ export default function UserProfilePage() {
         console.log(postsError);
       }
 
-      setPosts(postsData || []);
+      setPosts((postsData ?? []) as unknown as Post[]);
 
       // check if current user follows this profile
       if (user) {

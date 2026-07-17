@@ -21,7 +21,7 @@ export default function Home() {
     status?: "wip" | "finished" | null;
     profiles?: {
       username: string;
-    }[];
+    };
   };
 
   const [posts, setPosts] = useState<Post[]>([]);
@@ -54,7 +54,7 @@ export default function Home() {
       return [];
     }
 
-    return data || [];
+    return (data ?? []) as unknown as Post[];
   }, []);
 
   useEffect(() => {

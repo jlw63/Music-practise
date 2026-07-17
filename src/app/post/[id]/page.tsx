@@ -19,7 +19,7 @@ type Post = {
   status?: "wip" | "finished" | null;
   profiles?: {
     username: string;
-  }[];
+  };
 };
 
 export default function PostPage() {
@@ -53,7 +53,7 @@ export default function PostPage() {
         console.log(error);
       }
 
-      setPost(data);
+      setPost(data as unknown as Post);
       setLoading(false);
     }
 

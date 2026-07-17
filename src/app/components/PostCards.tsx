@@ -18,7 +18,7 @@ type Post = {
   genre?: string | null;
   instruments?: string[] | null;
   status?: "wip" | "finished" | null;
-  profiles?: { username: string }[];
+  profiles?: { username: string };
 };
 
 type Comment = {
@@ -26,7 +26,7 @@ type Comment = {
   content: string;
   created_at: string;
   author_id: string;
-  profiles?: { username: string }[];
+  profiles?: { username: string };
 };
 
 type Props = {
@@ -48,7 +48,7 @@ export default function PostCard({ post, variant = "detail" }: Props) {
   const thumbnail = youtubeThumbnail(post.video_url);
 
   const [authorUsername, setAuthorUsername] = useState<string | null>(
-    post.profiles?.[0]?.username || null
+    post.profiles?.username || null
   );
 
   useEffect(() => {
@@ -71,37 +71,6 @@ export default function PostCard({ post, variant = "detail" }: Props) {
   const [newComment, setNewComment] = useState("");
   const [editingCommentId, setEditingCommentId] = useState<string | null>(null);
   const [editComment, setEditComment] = useState("");
-
-  // Fill missing usernames for comments in batch
-  async function fillCommentUsernames(commentsArr: any[]) {
-    const missingIds = Array.from(
-      new Set(
-        commentsArr
-          .filter((c) => !c.profiles || !c.profiles[0]?.username)
-          .map((c) => c.author_id)
-      )
-    );
-
-    if (missingIds.length === 0) return commentsArr;
-
-    const { data: profilesData } = await supabase
-      .from("profiles")
-      .select("id,username")
-      .in("id", missingIds);
-
-    const profileMap: Record<string, string> = {};
-    profilesData?.forEach((p: any) => {
-      profileMap[p.id] = p.username;
-    });
-
-    return commentsArr.map((c) => ({
-      ...c,
-      profiles:
-        c.profiles && c.profiles.length > 0
-          ? c.profiles
-          : [{ username: profileMap[c.author_id] || "Unknown" }],
-    }));
-  }
 
   async function saveComment(commentId: string) {
     const { error } = await supabase
@@ -170,8 +139,7 @@ export default function PostCard({ post, variant = "detail" }: Props) {
         .eq("post_id", post.id)
         .order("created_at", { ascending: true });
 
-      const resolvedComments = await fillCommentUsernames(commentsData || []);
-      setComments(resolvedComments || []);
+      setComments((commentsData ?? []) as unknown as Comment[]);
     }
 
     fetchData();
@@ -264,8 +232,7 @@ export default function PostCard({ post, variant = "detail" }: Props) {
       .eq("post_id", post.id)
       .order("created_at", { ascending: true });
 
-    const resolved = await fillCommentUsernames(data || []);
-    setComments(resolved || []);
+    setComments((data ?? []) as unknown as Comment[]);
   }
 
   async function handleShare() {
@@ -414,12 +381,12 @@ export default function PostCard({ post, variant = "detail" }: Props) {
             {comments.map((comment) => (
               <div key={comment.id} className="flex gap-2.5 py-3 first:pt-0">
                 <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-blue-600 text-[11px] font-bold text-white">
-                  {(comment.profiles?.[0]?.username ?? "?")[0]?.toUpperCase()}
+                  {(comment.profiles?.username ?? "?")[0]?.toUpperCase()}
                 </div>
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-1.5">
                     <span className="text-sm font-medium text-[var(--foreground)]">
-                      {comment.profiles?.[0]?.username ?? "Unknown"}
+                      {comment.profiles?.username ?? "Unknown"}
                     </span>
                     <span className="text-xs text-[var(--muted)]">
                       · {timeAgo(comment.created_at)}

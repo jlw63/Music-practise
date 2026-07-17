@@ -5,9 +5,11 @@ import { useToast } from "@/context/ToastContext";
 import { supabase } from "@/lib/supabase";
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import PostCard from "@/app/components/PostCards";
 import UserList from "@/app/components/UserList";
 import PracticeLog from "@/app/components/PracticeLog";
+import { timeAgo } from "@/lib/timeAgo";
 
 type Profile = {
   username: string;
@@ -20,7 +22,7 @@ type Post = {
   id: string;
   title: string;
   content: string;
-  type: "video" | "discussion";
+  type: "video" | "discussion" | "feedback";
   video_url?: string;
   created_at: string;
   author_id: string;
@@ -29,7 +31,13 @@ type Post = {
   status?: "wip" | "finished" | null;
   profiles?: {
     username: string;
-  }[];
+  };
+};
+
+type FeedbackStats = {
+  avgRating: number | null;
+  ratingCount: number;
+  commentCount: number;
 };
 
 type ListUser = {
@@ -44,6 +52,7 @@ export default function ProfilePage() {
 
   const [profile, setProfile] = useState<Profile | null>(null);
   const [posts, setPosts] = useState<Post[]>([]);
+  const [feedbackStats, setFeedbackStats] = useState<Record<string, FeedbackStats>>({});
   const [loading, setLoading] = useState(true);
 
   const [followerList, setFollowerList] = useState<ListUser[]>([]);
@@ -102,7 +111,43 @@ export default function ProfilePage() {
         .eq("author_id", user.id)
         .order("created_at", { ascending: false });
 
-      setPosts(postsData || []);
+      setPosts((postsData ?? []) as unknown as Post[]);
+
+      const feedbackIds = (postsData || [])
+        .filter((p) => p.type === "feedback")
+        .map((p) => p.id);
+
+      if (feedbackIds.length > 0) {
+        const { data: ratingsData } = await supabase
+          .from("feedback_ratings")
+          .select("post_id, rating")
+          .in("post_id", feedbackIds);
+
+        const { data: commentsData } = await supabase
+          .from("comments")
+          .select("post_id")
+          .in("post_id", feedbackIds);
+
+        const stats: Record<string, FeedbackStats> = {};
+        feedbackIds.forEach((id) => {
+          stats[id] = { avgRating: null, ratingCount: 0, commentCount: 0 };
+        });
+
+        ratingsData?.forEach((r) => {
+          const stat = stats[r.post_id];
+          if (!stat) return;
+          const total = (stat.avgRating ?? 0) * stat.ratingCount + r.rating;
+          stat.ratingCount += 1;
+          stat.avgRating = total / stat.ratingCount;
+        });
+
+        commentsData?.forEach((c) => {
+          const stat = stats[c.post_id];
+          if (stat) stat.commentCount += 1;
+        });
+
+        setFeedbackStats(stats);
+      }
 
       const { data: followerUsers } = await supabase
         .from("followers")
@@ -268,6 +313,11 @@ export default function ProfilePage() {
     setEditingPostId(null);
     toast("Post updated", "success");
   }
+
+  const feedbackPosts = posts.filter((post) => post.type === "feedback");
+  const otherPosts = posts.filter(
+    (post): post is Post & { type: "video" | "discussion" } => post.type !== "feedback"
+  );
 
   const statButton = (label: string, count: number, key: "followers" | "following") => (
     <button
@@ -443,12 +493,50 @@ export default function ProfilePage() {
         <PracticeLog userId={user.id} editable={true} />
       </div>
 
+      {/* Feedback requests */}
+      {feedbackPosts.length > 0 && (
+        <>
+          <h2 className="mt-8 mb-4 text-xl font-bold tracking-tight text-[var(--foreground)]">
+            My Feedback Requests
+          </h2>
+
+          {feedbackPosts.map((post) => {
+            const stats = feedbackStats[post.id];
+            return (
+              <Link
+                key={post.id}
+                href={`/feedback/${post.id}`}
+                className="mb-3 block rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-5 shadow-sm transition hover:border-blue-500/60 hover:shadow-md"
+              >
+                <h3 className="text-lg font-semibold text-[var(--foreground)]">{post.title}</h3>
+                <p className="mt-0.5 text-xs text-[var(--muted)]">
+                  {timeAgo(post.created_at)}
+                </p>
+                <p className="mt-2 text-sm text-[var(--muted)] line-clamp-2">{post.content}</p>
+                <div className="mt-3 flex items-center gap-3 text-sm text-[var(--muted)]">
+                  <span className="flex items-center gap-1">
+                    ⭐{" "}
+                    {stats && stats.ratingCount > 0
+                      ? `${stats.avgRating!.toFixed(1)}/10 (${stats.ratingCount})`
+                      : "No ratings yet"}
+                  </span>
+                  <span>·</span>
+                  <span>
+                    💬 {stats?.commentCount ?? 0} comment{(stats?.commentCount ?? 0) === 1 ? "" : "s"}
+                  </span>
+                </div>
+              </Link>
+            );
+          })}
+        </>
+      )}
+
       {/* Posts */}
       <h2 className="mt-8 mb-4 text-xl font-bold tracking-tight text-[var(--foreground)]">
         My Posts
       </h2>
 
-      {posts.length === 0 && (
+      {otherPosts.length === 0 && (
         <div className="rounded-2xl border border-dashed border-[var(--border)] bg-[var(--surface)]/50 px-6 py-14 text-center">
           <p className="text-3xl">🎵</p>
           <p className="mt-3 font-semibold text-[var(--foreground)]">No posts yet</p>
@@ -458,7 +546,7 @@ export default function ProfilePage() {
         </div>
       )}
 
-      {posts.map((post) => (
+      {otherPosts.map((post) => (
         <div key={post.id} className="mb-6">
           {/* Owner toolbar */}
           {editingPostId !== post.id && (

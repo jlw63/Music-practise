@@ -20,7 +20,7 @@ type FeedbackPost = {
   genre?: string | null;
   instruments?: string[] | null;
   status?: "wip" | "finished" | null;
-  profiles?: { username: string }[];
+  profiles?: { username: string };
 };
 
 type Comment = {
@@ -28,7 +28,7 @@ type Comment = {
   content: string;
   created_at: string;
   author_id: string;
-  profiles?: { username: string }[];
+  profiles?: { username: string };
 };
 
 const RATING_CATEGORIES = [
@@ -140,7 +140,7 @@ export default function FeedbackDetailPage() {
         return;
       }
 
-      setPost(data);
+      setPost(data as unknown as FeedbackPost);
       setLoading(false);
     }
 
@@ -158,7 +158,7 @@ export default function FeedbackDetailPage() {
         .order("created_at", { ascending: true });
 
       if (!error) {
-        setComments(data || []);
+        setComments((data ?? []) as unknown as Comment[]);
       }
     }
 
@@ -228,7 +228,7 @@ export default function FeedbackDetailPage() {
         .single();
 
       if (latestComment) {
-        setComments((prev) => [...prev, latestComment]);
+        setComments((prev) => [...prev, latestComment as unknown as Comment]);
       }
       setCommentText("");
     }
@@ -252,7 +252,7 @@ export default function FeedbackDetailPage() {
     );
   }
 
-  const username = post.profiles?.[0]?.username;
+  const username = post.profiles?.username;
   const ratedCount = Object.values(ratings).filter((v) => v !== null).length;
 
   // feedback comments are private: the post author sees everything,
@@ -512,7 +512,7 @@ export default function FeedbackDetailPage() {
             >
               <div className="flex items-center justify-between gap-3">
                 <p className="text-sm font-medium text-[var(--foreground)]">
-                  {comment.profiles?.[0]?.username || "Anonymous"}
+                  {comment.profiles?.username || "Anonymous"}
                 </p>
                 <span className="text-xs text-[var(--muted)]">
                   {timeAgo(comment.created_at)}

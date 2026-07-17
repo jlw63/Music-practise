@@ -20,7 +20,7 @@ instruments?:string[]|null;
 status?:"wip"|"finished"|null;
 profiles:{
 username:string;
-}[];
+};
 };
 
 
@@ -87,7 +87,7 @@ return;
 }
 
 
-setPosts(data || []);
+setPosts((data ?? []) as unknown as Post[]);
 
 
 }
